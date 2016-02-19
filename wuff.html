@@ -8887,7 +8887,8 @@ Elm.Model.make = function (_elm) {
             return pl;
          }
    });
-   var End = {ctor: "End"};
+   var Draw = {ctor: "Draw"};
+   var Win = {ctor: "Win"};
    var OnGoing = {ctor: "OnGoing"};
    var endState = $Statey.makeState("end");
    var checkState = $Statey.makeState("checkState");
@@ -8969,7 +8970,8 @@ Elm.Model.make = function (_elm) {
                               ,endState: endState
                               ,millMachine: millMachine
                               ,OnGoing: OnGoing
-                              ,End: End
+                              ,Win: Win
+                              ,Draw: Draw
                               ,automatedStateSelect: automatedStateSelect
                               ,trans: trans
                               ,wrapper: wrapper
@@ -9043,7 +9045,12 @@ Elm.Update.make = function (_elm) {
                                                    ,A2($Graphics$Collage.traced,
                                                    $Graphics$Collage.defaultLine,
                                                    A2($Graphics$Collage.segment,{ctor: "_Tuple2",_0: 0,_1: -150},{ctor: "_Tuple2",_0: 0,_1: -45}))]));
-   var displayEnd = function (g) {
+   var displayDraw = A4($Graphics$Element.container,
+   600,
+   600,
+   $Graphics$Element.middle,
+   A3($Graphics$Collage.collage,500,500,_U.list([$Graphics$Collage.toForm($Graphics$Element.show("Draw!"))])));
+   var displayWin = function (g) {
       var winner = _U.eq(g.pl1.state,$Model.endState) ? "Player 2 wins" : "Player 1 wins";
       return A4($Graphics$Element.container,
       600,
@@ -9085,11 +9092,10 @@ Elm.Update.make = function (_elm) {
    });
    var display = F2(function (g,mouse) {
       var _p11 = g.status;
-      if (_p11.ctor === "OnGoing") {
-            return A2(displayOngoing,g,mouse);
-         } else {
-            return displayEnd(g);
-         }
+      switch (_p11.ctor)
+      {case "OnGoing": return A2(displayOngoing,g,mouse);
+         case "Draw": return displayDraw;
+         default: return displayWin(g);}
    });
    var helper$ = function (ctx) {    var nod = ctx.node;return {ctor: "_Tuple2",_0: nod.id,_1: nod.label};};
    var helper3 = function (_p12) {    var _p13 = _p12;return _U.list([_p13._0,_p13._1,_p13._2]);};
@@ -9113,7 +9119,11 @@ Elm.Update.make = function (_elm) {
                  } else {
                     return false;
                  }
-            case "HasMill": return A2($List.any,function (x) {    return _U.eq(x,sndNod);},pass.myFields) && $Basics.not(A2(isInMill,pass,sndNod));
+            case "HasMill": return A2($List.any,function (x) {    return $Basics.not(A2(isInMill,pass,x));},pass.myFields) ? A2($List.any,
+              function (x) {
+                 return _U.eq(x,sndNod);
+              },
+              pass.myFields) && $Basics.not(A2(isInMill,pass,sndNod)) : A2($List.any,function (x) {    return _U.eq(x,sndNod);},pass.myFields);
             case "Jump": return A2($List.member,sndNod,freeNodes);
             case "Put": return A2($List.member,sndNod,freeNodes);
             default: return true;}
@@ -9122,7 +9132,11 @@ Elm.Update.make = function (_elm) {
          var _p16 = st;
          switch (_p16.ctor)
          {case "Put": return A2($List.member,fstNod,freeNodes);
-            case "HasMill": return A2($List.any,function (x) {    return _U.eq(x,fstNod);},pass.myFields) && $Basics.not(A2(isInMill,pass,fstNod));
+            case "HasMill": return A2($List.any,function (x) {    return $Basics.not(A2(isInMill,pass,x));},pass.myFields) ? A2($List.any,
+              function (x) {
+                 return _U.eq(x,fstNod);
+              },
+              pass.myFields) && $Basics.not(A2(isInMill,pass,fstNod)) : A2($List.any,function (x) {    return _U.eq(x,fstNod);},pass.myFields);
             case "Slide": return A2($List.member,fstNod,curr.myFields);
             case "Jump": return A2($List.member,fstNod,curr.myFields);
             default: return true;}
@@ -9302,7 +9316,8 @@ Elm.Update.make = function (_elm) {
       var newPl1 = _p40._0;
       var newPl2 = _p40._1;
       var newPlx = three;
-      var newStatus = _U.eq(one.state,$Model.endState) || _U.eq(two.state,$Model.endState) ? $Model.End : $Model.OnGoing;
+      var newStatus = _U.eq(one.state,$Model.endState) || _U.eq(two.state,$Model.endState) ? $Model.Win : _U.eq(one.numOfStones,3) && _U.eq(two.numOfStones,
+      3) ? $Model.Draw : $Model.OnGoing;
       return _U.update(g,{pl1: newPl1,pl2: newPl2,plx: newPlx,status: newStatus});
    });
    var fastForward = F2(function (inp,g) {
@@ -9408,7 +9423,8 @@ Elm.Update.make = function (_elm) {
                                ,gameState: gameState
                                ,display: display
                                ,displayOngoing: displayOngoing
-                               ,displayEnd: displayEnd
+                               ,displayWin: displayWin
+                               ,displayDraw: displayDraw
                                ,main: main
                                ,realField: realField
                                ,withinRange: withinRange

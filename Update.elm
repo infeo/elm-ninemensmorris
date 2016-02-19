@@ -200,7 +200,11 @@ stepForward (fstNode,sndNode) g =
         (one, two, three) = stepPlayerS fstNode sndNode curr opp g.plx
         (newPl1, newPl2) = if one.name == "White Hat" then (one,two) else (two,one) --UGLY
         newPlx = three
-        newStatus = if (one.state == endState || two.state == endState) then End else OnGoing
+        newStatus = if (one.state == endState || two.state == endState) 
+                    then Win 
+                    else if one.numOfStones == 3 && two.numOfStones ==3 
+                    then Draw
+                    else OnGoing
     in { g |
         pl1 = newPl1,
         pl2 = newPl2,
@@ -262,7 +266,8 @@ gameState = Signal.foldp stepGame initGame input
 display :Game -> (Int,Int) -> Element
 display g mouse = case g.status of
                     OnGoing -> displayOngoing g mouse
-                    End -> displayEnd g
+                    Draw -> displayDraw
+                    _ -> displayWin g
 
 displayOngoing : Game -> (Int,Int)-> Element
 displayOngoing g test =
@@ -284,11 +289,17 @@ displayOngoing g test =
             , showStones Color.black blackStones
             ]
 
-displayEnd : Game -> Element
-displayEnd g = let winner = if g.pl1.state == endState then "Player 2 wins" else "Player 1 wins"
+displayWin : Game -> Element
+displayWin g = let winner = if g.pl1.state == endState then "Player 2 wins" else "Player 1 wins"
                in container 600 600 middle <|
                 collage 500 500
                     [ toForm (show winner) ]
+
+displayDraw : Element
+displayDraw = container 600 600 middle <|
+                collage 500 500
+                    [ toForm (show "Draw!") ]
+
 
 main : Signal.Signal Element       
 main = Signal.map2 display gameState (Mouse.position)

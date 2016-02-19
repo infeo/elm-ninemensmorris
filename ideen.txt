@@ -1,6 +1,7 @@
 Ideen:
 
-Unentschieden Einführen
+Ausnahme für Steine nehmen einführen oder den Zug überspringen ( wenn alle gegenerischen Steine in einer Mühle sind)
+-> siehe in Model StateMachineGuards
 
 Mehr abgeschlossene Komponenten bauen -> Modul Board exportiert nur noch ein, zwei Sachen
 Die Update Methode mehr über Schnittstellen programmieren -> statt Graph zu importieren, lieber Funktion magic einbauen, die durch Graph.get umgesetzt wird
