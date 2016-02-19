@@ -35,15 +35,18 @@ initGame =
 -- Annotation: the field myFields is in this case small. for larger games, a dictionary/associative array is suggested
 type alias Player = 
     StateRecord { name: String, playing : Bool, numOfStonesInGame : Int, 
-                  numOfStones: Int, closedMill : Bool, mills : List Mill, canMove : Bool, myFields : List NodeId}
+                  numOfStones: Int, closedMill : Bool, mills : List Mill, canMove : Bool, myFields : List NodeId, ty : FakePlayer}
 white : Player
-white = { name="White Hat", playing=True, numOfStonesInGame=0, numOfStones=9, closedMill=False, mills=[],canMove=True, myFields=[], state=pseudoMoveState}
+white = { name="White Hat", playing=True, numOfStonesInGame=0, numOfStones=9, closedMill=False, mills=[],canMove=True, myFields=[], ty=White  ,state=pseudoMoveState}
 
 black : Player
-black = { white | name="Black Hat", playing=False}
+black = { white | name="Black Hat", playing=False, ty = Black}
 
 noOne : Player
-noOne = { white | name ="No Hat", playing=False, numOfStones=0, canMove=False, myFields= Board.nodeList}
+noOne = { white | name ="No Hat", playing=False, numOfStones=0, canMove=False, myFields= Board.nodeList, ty=NoOne}
+
+type FakePlayer = White | Black | NoOne
+
 --the StateMachine and init of it    
 
 --Create the States

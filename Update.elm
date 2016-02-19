@@ -121,41 +121,35 @@ updateMills pl oldId newId= let ls = List.filter (\(a,b,c) -> a /= oldId && b /=
 
 stepPlayer : Player -> NodeId -> NodeId -> Player
 stepPlayer pl oldId newId = 
-    let st = wrapper pl
-        newPl = if st == putState
-                then let tmp = { pl | 
-                                    numOfStonesInGame = pl.numOfStonesInGame + 1,
-                                    myFields = newId::pl.myFields 
-                               }
-                         (a,b) = updateMills tmp oldId newId
-                     in { tmp | 
-                          mills = b,
-                          closedMill = a
-                        }
-                else
-                if st == slideState
-                then let tmp = { pl |
-                                    myFields = newId::(List.filter (\x -> x/= oldId) pl.myFields)
-                               } 
-                         (a,b) = updateMills tmp oldId newId
-                     in { tmp |
-                            mills = b,
-                            closedMill = a
-                        }
-                 else 
-                 if st == jumpState 
-                 then let tmp = { pl |
-                                    myFields = newId::(List.filter (\x -> x/= oldId) pl.myFields)
+    let st = wrapper' pl
+        newPl = case st of
+                    Put -> let tmp = { pl | 
+                                        numOfStonesInGame = pl.numOfStonesInGame + 1,
+                                        myFields = newId::pl.myFields 
+                                        }
+                               (a,b) = updateMills tmp oldId newId
+                            in { tmp | 
+                                    mills = b,
+                                    closedMill = a
                                 }
-                          (a,b) = updateMills tmp oldId newId
-                      in { tmp |
-                            mills = b,
-                            closedMill = a
-                         }
-                 else
-                 if st == hasMillState
-                 then {pl | closedMill = False}
-                 else pl
+                    Slide -> let tmp = { pl |
+                                            myFields = newId::(List.filter (\x -> x/= oldId) pl.myFields)
+                                        } 
+                                 (a,b) = updateMills tmp oldId newId
+                            in { tmp |
+                                    mills = b,
+                                    closedMill = a
+                                }
+                    Jump -> let tmp = { pl |
+                                        myFields = newId::(List.filter (\x -> x/= oldId) pl.myFields)
+                                        }
+                                (a,b) = updateMills tmp oldId newId
+                            in { tmp |
+                                    mills = b,
+                                    closedMill = a
+                                }
+                    HasMill -> {pl | closedMill = False}
+                    _ -> pl
     in trans newPl wizard 
 
 
@@ -198,7 +192,9 @@ stepForward : (NodeId,NodeId) -> Game -> Game
 stepForward (fstNode,sndNode) g =
     let (curr,opp) = if g.pl1.playing then (g.pl1,g.pl2) else (g.pl2,g.pl1)
         (one, two, three) = stepPlayerS fstNode sndNode curr opp g.plx
-        (newPl1, newPl2) = if one.name == "White Hat" then (one,two) else (two,one) --UGLY
+        (newPl1, newPl2) = case one.ty of
+                            White -> (one,two)
+                            _ -> (two, one)
         newPlx = three
         newStatus = if (one.state == endState || two.state == endState) 
                     then Win 
@@ -212,8 +208,8 @@ stepForward (fstNode,sndNode) g =
         status = newStatus
         }
         
--- setzt voraus, dass sich bei jedem stepForward der Zustand eines players sich ändert
 -- do multiple state-transitions with one Click
+-- @ inv: every time the Funktion is called, the state of the player changes
 fastForward: (NodeId,NodeId) -> Game -> Game
 fastForward inp g = let (curr,opp) = if g.pl1.playing then (g.pl1,g.pl2) else (g.pl2,g.pl1)
                         valid = validTurns curr opp g.plx (fst inp) (snd inp)
