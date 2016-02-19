@@ -1,0 +1,31 @@
+Ideen:
+
+Unentschieden Einführen
+
+Mehr abgeschlossene Komponenten bauen -> Modul Board exportiert nur noch ein, zwei Sachen
+Die Update Methode mehr über Schnittstellen programmieren -> statt Graph zu importieren, lieber Funktion magic einbauen, die durch Graph.get umgesetzt wird
+
+- führe einen Spieler-Typ ein z.B. FakePlayer
+    -> baue dann den Code in Update um, bette den Typ in den Record Player ein in Model
+    
+Gestalte Startseite, bevor gespielt wird
+-> verschiedene Mühle-Varianten implementieren
+-> denke eigene Mühle Varainte aus
+
+Markiere gewählte Steine der möglichen Züge farbig
+
+Baue KI (setzte zufällig Steine, versuche gegnerische Mühle zu verhindern & vervollständige eigene Mühle)
+
+Lade alles auf Github
+
+Baue einen "Erneut spielen"-Knopf ein
+
+
+Subsysteme:
+Spiel brett 1.Tier
+Modell, Regeln, Zustände 2.Tier
+Update 3.Tier
+Ausgabe 4.Tier
+
+Nochmals mittels Kohärenz und Kopplung überdenken
+Facade dann mittels der Sichtbarmachung von Funktionen & Typen hinter Modulnamen implementieren
