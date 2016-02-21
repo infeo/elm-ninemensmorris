@@ -1,7 +1,6 @@
 module Model where
 import Statey exposing (..)
 import Board
---import View
 import Graph exposing (..)
 
 --idee:

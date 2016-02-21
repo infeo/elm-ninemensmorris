@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html><head><meta charset="UTF-8"><title>Update</title><style>html,head,body { padding:0; margin:0; }
+<html><head><meta charset="UTF-8"><title>View</title><style>html,head,body { padding:0; margin:0; }
 body { font-family: calibri, helvetica, arial, sans-serif; }</style><script type="text/javascript">var Elm = Elm || { Native: {} };Elm.Native.Array = {};
 Elm.Native.Array.make = function(localRuntime) {
 
@@ -8999,21 +8999,368 @@ Elm.Update.make = function (_elm) {
    _elm.Update = _elm.Update || {};
    if (_elm.Update.values) return _elm.Update.values;
    var _U = Elm.Native.Utils.make(_elm),
-   $Array = Elm.Array.make(_elm),
    $Basics = Elm.Basics.make(_elm),
-   $Color = Elm.Color.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Dict = Elm.Dict.make(_elm),
    $Graph = Elm.Graph.make(_elm),
-   $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
-   $Graphics$Element = Elm.Graphics.Element.make(_elm),
    $Inputs = Elm.Inputs.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Model = Elm.Model.make(_elm),
-   $Mouse = Elm.Mouse.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var withinRange = F3(function (_p1,delta,_p0) {
+      var _p2 = _p1;
+      var _p7 = _p2._1;
+      var _p6 = _p2._0;
+      var _p3 = _p0;
+      var _p5 = _p3._1;
+      var _p4 = _p3._0;
+      return _U.cmp(_p6,_p4 + delta) < 1 && _U.cmp(_p6,_p4 - delta) > -1 && (_U.cmp(_p7,_p5 + delta) < 1 && _U.cmp(_p7,
+      _p5 - delta) > -1) ? $Maybe.Just({ctor: "_Tuple2",_0: _p4,_1: _p5}) : $Maybe.Nothing;
+   });
+   var helper$ = function (ctx) {    var nod = ctx.node;return {ctor: "_Tuple2",_0: nod.id,_1: nod.label};};
+   var helper3 = function (_p8) {    var _p9 = _p8;return _U.list([_p9._0,_p9._1,_p9._2]);};
+   var isInMill = F2(function (pl,nodeId) {    var ls = A2($List.concatMap,helper3,pl.mills);return A2($List.member,nodeId,ls);});
+   var dragon = $Model.initGame.plx.myFields;
+   var magic = $Model.initGame.board;
+   var validTurns = F5(function (curr,pass,dummy,fstNod,sndNod) {
+      var freeNodes = dummy.myFields;
+      var st = $Model.wrapper$(curr);
+      var sndOk = function () {
+         var _p10 = st;
+         switch (_p10.ctor)
+         {case "Slide": var x = A2($Graph.get,fstNod,magic);
+              var _p11 = x;
+              if (_p11.ctor === "Just") {
+                    return A2($List.any,
+                    function (x) {
+                       return _U.eq(x,sndNod);
+                    },
+                    A2($List.filter,function (x) {    return A2($List.member,x,freeNodes);},$Graph.alongOutgoingEdges(_p11._0)));
+                 } else {
+                    return false;
+                 }
+            case "HasMill": return A2($List.any,function (x) {    return _U.eq(x,sndNod);},pass.myFields) && $Basics.not(A2(isInMill,pass,sndNod));
+            case "Jump": return A2($List.member,sndNod,freeNodes);
+            case "Put": return A2($List.member,sndNod,freeNodes);
+            default: return true;}
+      }();
+      var fstOk = function () {
+         var _p12 = st;
+         switch (_p12.ctor)
+         {case "Put": return A2($List.member,fstNod,freeNodes);
+            case "HasMill": return A2($List.any,function (x) {    return _U.eq(x,fstNod);},pass.myFields) && $Basics.not(A2(isInMill,pass,fstNod));
+            case "Slide": return A2($List.member,fstNod,curr.myFields);
+            case "Jump": return A2($List.member,fstNod,curr.myFields);
+            default: return true;}
+      }();
+      var relOk = function () {
+         var _p13 = st;
+         switch (_p13.ctor)
+         {case "Slide": return !_U.eq(fstNod,sndNod);
+            case "Jump": return !_U.eq(fstNod,sndNod);
+            case "HasMill": return _U.eq(fstNod,sndNod);
+            case "Put": return _U.eq(fstNod,sndNod);
+            default: return true;}
+      }();
+      return relOk && (fstOk && sndOk);
+   });
+   var helper2 = function (id) {
+      var _p14 = A2($Graph.get,id,magic);
+      if (_p14.ctor === "Just") {
+            return $Graph.alongOutgoingEdges(_p14._0);
+         } else {
+            return _U.list([]);
+         }
+   };
+   var checkMovement = F2(function (pl,dummy) {
+      var freeNodes = dummy.myFields;
+      var _p15 = pl.numOfStones;
+      if (_p15 === 3) {
+            return freeNodes;
+         } else {
+            var ls = A2($List.concatMap,helper2,pl.myFields);
+            var ls2 = A2($List.filter,function (x) {    return $Basics.not(A2($List.member,x,pl.myFields));},ls);
+            var ls3 = A2($List.filter,function (x) {    return A2($List.member,x,freeNodes);},ls2);
+            return ls3;
+         }
+   });
+   var helper = function (x) {
+      var _p16 = A2($Graph.get,x,magic);
+      if (_p16.ctor === "Just") {
+            var nod = _p16._0.node;
+            return {ctor: "_Tuple2",_0: nod.id,_1: nod.label};
+         } else {
+            return {ctor: "_Tuple2",_0: 0,_1: {ctor: "_Tuple3",_0: 0,_1: 0,_2: 0}};
+         }
+   };
+   var getNewMills = F2(function (pl,nod) {
+      var toTuple = function (ls) {
+         var _p17 = ls;
+         if (_p17.ctor === "::" && _p17._1.ctor === "::" && _p17._1._1.ctor === "::" && _p17._1._1._1.ctor === "[]") {
+               return $Maybe.Just({ctor: "_Tuple3",_0: _p17._0,_1: _p17._1._0,_2: _p17._1._1._0});
+            } else {
+               return $Maybe.Nothing;
+            }
+      };
+      var member$ = F2(function (x,ls) {
+         member$: while (true) {
+            var _p18 = ls;
+            if (_p18.ctor === "[]") {
+                  return $Maybe.Nothing;
+               } else {
+                  if (_U.eq(x,_p18._0._1)) return $Maybe.Just(_p18._0._0); else {
+                        var _v12 = x,_v13 = _p18._1;
+                        x = _v12;
+                        ls = _v13;
+                        continue member$;
+                     }
+               }
+         }
+      });
+      var put = F3(function (pos,_p19,x) {
+         var _p20 = _p19;
+         var _p23 = _p20._1;
+         var _p22 = _p20._0;
+         var _p21 = pos;
+         switch (_p21)
+         {case 0: return {ctor: "_Tuple3",_0: x,_1: _p22,_2: _p23};
+            case 1: return {ctor: "_Tuple3",_0: _p22,_1: x,_2: _p23};
+            default: return {ctor: "_Tuple3",_0: _p22,_1: _p23,_2: x};}
+      });
+      var select = function (x) {    var _p24 = x;switch (_p24) {case 0: return _U.list([1,2]);case 1: return _U.list([0,2]);default: return _U.list([0,1]);}};
+      var _p25 = $Basics.snd(helper(nod));
+      var a = _p25._0;
+      var b = _p25._1;
+      var c = _p25._2;
+      var max = F3(function (ns,num,val) {    return _U.cmp(num,3) < 0 ? A2($Basics._op["++"],ns,val) : val;});
+      var tupLs = A2($List.filter,
+      function (x) {
+         return A2($List.member,$Basics.fst(x),pl.myFields);
+      },
+      A2($List.map,helper$,$Basics.fst(A5($Graph.guidedBfs,$Graph.alongOutgoingEdges,max,_U.list([nod]),_U.list([]),magic))));
+      var decide = F3(function (pos,tup,z) {
+         var tupLs2 = A2($List.filterMap,function (x) {    return A2(member$,x,tupLs);},A2($List.map,A2(put,pos,tup),select(z)));
+         return _U.eq($List.length(tupLs2),2) ? A2($List._op["::"],nod,tupLs2) : _U.list([]);
+      });
+      var aMill = A3(decide,0,{ctor: "_Tuple2",_0: b,_1: c},a);
+      var bMill = A3(decide,1,{ctor: "_Tuple2",_0: a,_1: c},b);
+      var cMill = A3(decide,2,{ctor: "_Tuple2",_0: a,_1: b},c);
+      return A2($List.filterMap,toTuple,_U.list([aMill,bMill,cMill]));
+   });
+   var updateMills = F3(function (pl,oldId,newId) {
+      var ls2 = A2(getNewMills,pl,newId);
+      var ls = A2($List.filter,
+      function (_p26) {
+         var _p27 = _p26;
+         return !_U.eq(_p27._0,oldId) && (!_U.eq(_p27._1,oldId) && !_U.eq(_p27._2,oldId));
+      },
+      pl.mills);
+      return {ctor: "_Tuple2",_0: $Basics.not($List.isEmpty(ls2)),_1: $List.concat(A2($List._op["::"],ls2,_U.list([ls])))};
+   });
+   var wizard = $Model.initGame.machine;
+   var stepPlayer = F3(function (pl,oldId,newId) {
+      var st = $Model.wrapper$(pl);
+      var newPl = function () {
+         var _p28 = st;
+         switch (_p28.ctor)
+         {case "Put": var tmp = _U.update(pl,{numOfStonesInGame: pl.numOfStonesInGame + 1,myFields: A2($List._op["::"],newId,pl.myFields)});
+              var _p29 = A3(updateMills,tmp,oldId,newId);
+              var a = _p29._0;
+              var b = _p29._1;
+              return _U.update(tmp,{mills: b,closedMill: a});
+            case "Slide": var tmp = _U.update(pl,{myFields: A2($List._op["::"],newId,A2($List.filter,function (x) {    return !_U.eq(x,oldId);},pl.myFields))});
+              var _p30 = A3(updateMills,tmp,oldId,newId);
+              var a = _p30._0;
+              var b = _p30._1;
+              return _U.update(tmp,{mills: b,closedMill: a});
+            case "Jump": var tmp = _U.update(pl,{myFields: A2($List._op["::"],newId,A2($List.filter,function (x) {    return !_U.eq(x,oldId);},pl.myFields))});
+              var _p31 = A3(updateMills,tmp,oldId,newId);
+              var a = _p31._0;
+              var b = _p31._1;
+              return _U.update(tmp,{mills: b,closedMill: a});
+            case "HasMill": return _U.update(pl,{closedMill: false});
+            default: return pl;}
+      }();
+      return A2($Model.trans,newPl,wizard);
+   });
+   var stepPlayerS = F5(function (oldId,newId,curr,pass,dummy) {
+      var tmp = pass.numOfStones;
+      var newCurr = A3(stepPlayer,curr,oldId,newId);
+      var st = $Model.wrapper$(curr);
+      var _p32 = st;
+      switch (_p32.ctor)
+      {case "Put": return {ctor: "_Tuple3"
+                          ,_0: newCurr
+                          ,_1: pass
+                          ,_2: _U.update(dummy,{myFields: A2($List.filter,function (x) {    return !_U.eq(x,newId);},dummy.myFields)})};
+         case "Slide": return {ctor: "_Tuple3"
+                              ,_0: newCurr
+                              ,_1: pass
+                              ,_2: _U.update(dummy,
+                              {myFields: A2($List._op["::"],oldId,A2($List.filter,function (x) {    return !_U.eq(x,newId);},dummy.myFields))})};
+         case "Jump": return {ctor: "_Tuple3"
+                             ,_0: newCurr
+                             ,_1: pass
+                             ,_2: _U.update(dummy,
+                             {myFields: A2($List._op["::"],oldId,A2($List.filter,function (x) {    return !_U.eq(x,newId);},dummy.myFields))})};
+         case "HasMill": return {ctor: "_Tuple3"
+                                ,_0: newCurr
+                                ,_1: _U.update(pass,{myFields: A2($List.filter,function (x) {    return !_U.eq(x,newId);},pass.myFields),numOfStones: tmp - 1})
+                                ,_2: _U.update(dummy,{myFields: A2($List._op["::"],newId,dummy.myFields)})};
+         case "Check": var tmp_pass = _U.update(pass,{canMove: $Basics.not($List.isEmpty(A2(checkMovement,pass,dummy)))});
+           var newPass = A2($Model.trans,tmp_pass,wizard);
+           return {ctor: "_Tuple3"
+                  ,_0: _U.update(curr,{playing: false,canMove: $Basics.not($List.isEmpty(A2(checkMovement,curr,dummy)))})
+                  ,_1: _U.update(newPass,{playing: true})
+                  ,_2: dummy};
+         default: return {ctor: "_Tuple3",_0: newCurr,_1: pass,_2: dummy};}
+   });
+   var stepForward = F2(function (_p33,g) {
+      var _p34 = _p33;
+      var _p35 = g.pl1.playing ? {ctor: "_Tuple2",_0: g.pl1,_1: g.pl2} : {ctor: "_Tuple2",_0: g.pl2,_1: g.pl1};
+      var curr = _p35._0;
+      var opp = _p35._1;
+      var _p36 = A5(stepPlayerS,_p34._0,_p34._1,curr,opp,g.plx);
+      var one = _p36._0;
+      var two = _p36._1;
+      var three = _p36._2;
+      var _p37 = function () {
+         var _p38 = one.ty;
+         if (_p38.ctor === "White") {
+               return {ctor: "_Tuple2",_0: one,_1: two};
+            } else {
+               return {ctor: "_Tuple2",_0: two,_1: one};
+            }
+      }();
+      var newPl1 = _p37._0;
+      var newPl2 = _p37._1;
+      var newPlx = three;
+      var newStatus = _U.eq(one.state,$Model.endState) || _U.eq(two.state,$Model.endState) ? $Model.Win : _U.eq(one.numOfStones,3) && _U.eq(two.numOfStones,
+      3) ? $Model.Draw : $Model.OnGoing;
+      return _U.update(g,{pl1: newPl1,pl2: newPl2,plx: newPlx,status: newStatus});
+   });
+   var fastForward = F2(function (inp,g) {
+      fastForward: while (true) {
+         var _p39 = g.pl1.playing ? {ctor: "_Tuple2",_0: g.pl1,_1: g.pl2} : {ctor: "_Tuple2",_0: g.pl2,_1: g.pl1};
+         var curr = _p39._0;
+         var opp = _p39._1;
+         var valid = A5(validTurns,curr,opp,g.plx,$Basics.fst(inp),$Basics.snd(inp));
+         var st = $Model.wrapper$(curr);
+         if (valid) {
+               var _p40 = st;
+               switch (_p40.ctor)
+               {case "PseudoMove": return A2(stepForward,inp,g);
+                  case "PseudoTake": var g1 = A2(stepForward,inp,g);
+                    var curr = g1.pl1.playing ? g1.pl1 : g1.pl2;
+                    var _p41 = $Model.wrapper$(curr);
+                    if (_p41.ctor === "HasMill") {
+                          return g1;
+                       } else {
+                          var _v24 = inp,_v25 = g1;
+                          inp = _v24;
+                          g = _v25;
+                          continue fastForward;
+                       }
+                  case "EndSt": return g;
+                  default: var g1 = A2(stepForward,inp,g);
+                    var _v26 = inp,_v27 = g1;
+                    inp = _v26;
+                    g = _v27;
+                    continue fastForward;}
+            } else return g;
+      }
+   });
+   var stepGame = F2(function (input,g) {
+      var g$ = _U.update(g,{fstNod: $Maybe.Nothing});
+      var fstNod = g.fstNod;
+      var _p42 = g.pl1.playing ? {ctor: "_Tuple2",_0: g.pl1,_1: g.pl2} : {ctor: "_Tuple2",_0: g.pl2,_1: g.pl1};
+      var curr = _p42._0;
+      var opp = _p42._1;
+      var st = $Model.wrapper$(curr);
+      var ls = g.view.coords;
+      var mybNod = A2($Maybe.andThen,$List.head(A2($List.filterMap,A2(withinRange,input,10),ls)),function (x) {    return A2($Dict.get,x,g.view.coordToNode);});
+      var _p43 = st;
+      switch (_p43.ctor)
+      {case "Jump": var _p44 = fstNod;
+           if (_p44.ctor === "Nothing") {
+                 return _U.update(g$,{fstNod: mybNod});
+              } else {
+                 var _p45 = mybNod;
+                 if (_p45.ctor === "Nothing") {
+                       return g$;
+                    } else {
+                       return A2(fastForward,{ctor: "_Tuple2",_0: _p44._0,_1: _p45._0},g$);
+                    }
+              }
+         case "Slide": var _p46 = fstNod;
+           if (_p46.ctor === "Nothing") {
+                 return _U.update(g$,{fstNod: mybNod});
+              } else {
+                 var _p47 = mybNod;
+                 if (_p47.ctor === "Nothing") {
+                       return g$;
+                    } else {
+                       return A2(fastForward,{ctor: "_Tuple2",_0: _p46._0,_1: _p47._0},g$);
+                    }
+              }
+         case "HasMill": var _p48 = mybNod;
+           if (_p48.ctor === "Nothing") {
+                 return g$;
+              } else {
+                 var _p49 = _p48._0;
+                 return A2(fastForward,{ctor: "_Tuple2",_0: _p49,_1: _p49},g$);
+              }
+         case "Put": var _p50 = mybNod;
+           if (_p50.ctor === "Nothing") {
+                 return g$;
+              } else {
+                 var _p51 = _p50._0;
+                 return A2(fastForward,{ctor: "_Tuple2",_0: _p51,_1: _p51},g$);
+              }
+         default: return A2(fastForward,{ctor: "_Tuple2",_0: 0,_1: 0},g$);}
+   });
+   var gameState = A3($Signal.foldp,stepGame,$Model.initGame,$Inputs.input);
+   return _elm.Update.values = {_op: _op
+                               ,wizard: wizard
+                               ,magic: magic
+                               ,dragon: dragon
+                               ,isInMill: isInMill
+                               ,helper3: helper3
+                               ,checkMovement: checkMovement
+                               ,validTurns: validTurns
+                               ,helper2: helper2
+                               ,getNewMills: getNewMills
+                               ,helper$: helper$
+                               ,helper: helper
+                               ,updateMills: updateMills
+                               ,stepPlayer: stepPlayer
+                               ,stepPlayerS: stepPlayerS
+                               ,stepForward: stepForward
+                               ,fastForward: fastForward
+                               ,withinRange: withinRange
+                               ,stepGame: stepGame
+                               ,gameState: gameState};
+};Elm.View = Elm.View || {};
+Elm.View.make = function (_elm) {
+   "use strict";
+   _elm.View = _elm.View || {};
+   if (_elm.View.values) return _elm.View.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Array = Elm.Array.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Model = Elm.Model.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Update = Elm.Update.make(_elm);
    var _op = {};
    var showPlayer = function (pl) {
       var ma = function (_p0) {    return $Graphics$Collage.toForm($Graphics$Element.show(_p0));};
@@ -9026,16 +9373,6 @@ Elm.Update.make = function (_elm) {
                                              ,A2($Graphics$Collage.move,{ctor: "_Tuple2",_0: 0,_1: 60},ma(pl.state))
                                              ,A2($Graphics$Collage.move,{ctor: "_Tuple2",_0: 0,_1: 70},ma(pl.mills))]));
    };
-   var withinRange = F3(function (_p2,delta,_p1) {
-      var _p3 = _p2;
-      var _p8 = _p3._1;
-      var _p7 = _p3._0;
-      var _p4 = _p1;
-      var _p6 = _p4._1;
-      var _p5 = _p4._0;
-      return _U.cmp(_p7,_p5 + delta) < 1 && _U.cmp(_p7,_p5 - delta) > -1 && (_U.cmp(_p8,_p6 + delta) < 1 && _U.cmp(_p8,
-      _p6 - delta) > -1) ? $Maybe.Just({ctor: "_Tuple2",_0: _p5,_1: _p6}) : $Maybe.Nothing;
-   });
    var realField = $Graphics$Collage.group(_U.list([A2($Graphics$Collage.filled,$Color.grey,$Graphics$Collage.square(400))
                                                    ,A2($Graphics$Collage.outlined,$Graphics$Collage.defaultLine,$Graphics$Collage.square(300.0))
                                                    ,A2($Graphics$Collage.outlined,$Graphics$Collage.defaultLine,$Graphics$Collage.square(195.0))
@@ -9065,13 +9402,13 @@ Elm.Update.make = function (_elm) {
       $Graphics$Element.middle,
       A3($Graphics$Collage.collage,500,500,_U.list([$Graphics$Collage.toForm($Graphics$Element.show(winner))])));
    };
-   var displayOngoing = F2(function (g,test) {
+   var displayOngoing = function (g) {
       var showStones = F2(function (color,ls) {
          return $Graphics$Collage.group(A2($List.map,
-         function (_p9) {
-            var _p10 = _p9;
+         function (_p1) {
+            var _p2 = _p1;
             return A2($Graphics$Collage.move,
-            {ctor: "_Tuple2",_0: $Basics.toFloat(_p10._0),_1: $Basics.toFloat(0 - _p10._1)},
+            {ctor: "_Tuple2",_0: $Basics.toFloat(_p2._0),_1: $Basics.toFloat(0 - _p2._1)},
             A2($Graphics$Collage.filled,color,$Graphics$Collage.circle(10)));
          },
          ls));
@@ -9093,346 +9430,23 @@ Elm.Update.make = function (_elm) {
               ,A2($Graphics$Collage.move,{ctor: "_Tuple2",_0: -100,_1: 175},showPlayer(pl1))
               ,A2($Graphics$Collage.move,{ctor: "_Tuple2",_0: 100,_1: 175},showPlayer(pl2))
               ,$Graphics$Collage.toForm($Graphics$Element.show(g.status))
-              ,A2($Graphics$Collage.move,{ctor: "_Tuple2",_0: 0,_1: -175},$Graphics$Collage.toForm($Graphics$Element.show(test)))
               ,A2(showStones,$Color.white,whiteStones)
               ,A2(showStones,$Color.black,blackStones)])));
-   });
-   var display = F2(function (g,mouse) {
-      var _p11 = g.status;
-      switch (_p11.ctor)
-      {case "OnGoing": return A2(displayOngoing,g,mouse);
+   };
+   var display = function (g) {
+      var _p3 = g.status;
+      switch (_p3.ctor)
+      {case "OnGoing": return displayOngoing(g);
          case "Draw": return displayDraw;
          default: return displayWin(g);}
-   });
-   var helper$ = function (ctx) {    var nod = ctx.node;return {ctor: "_Tuple2",_0: nod.id,_1: nod.label};};
-   var helper3 = function (_p12) {    var _p13 = _p12;return _U.list([_p13._0,_p13._1,_p13._2]);};
-   var isInMill = F2(function (pl,nodeId) {    var ls = A2($List.concatMap,helper3,pl.mills);return A2($List.member,nodeId,ls);});
-   var dragon = $Model.initGame.plx.myFields;
-   var magic = $Model.initGame.board;
-   var validTurns = F5(function (curr,pass,dummy,fstNod,sndNod) {
-      var freeNodes = dummy.myFields;
-      var st = $Model.wrapper$(curr);
-      var sndOk = function () {
-         var _p14 = st;
-         switch (_p14.ctor)
-         {case "Slide": var x = A2($Graph.get,fstNod,magic);
-              var _p15 = x;
-              if (_p15.ctor === "Just") {
-                    return A2($List.any,
-                    function (x) {
-                       return _U.eq(x,sndNod);
-                    },
-                    A2($List.filter,function (x) {    return A2($List.member,x,freeNodes);},$Graph.alongOutgoingEdges(_p15._0)));
-                 } else {
-                    return false;
-                 }
-            case "HasMill": return A2($List.any,function (x) {    return _U.eq(x,sndNod);},pass.myFields) && $Basics.not(A2(isInMill,pass,sndNod));
-            case "Jump": return A2($List.member,sndNod,freeNodes);
-            case "Put": return A2($List.member,sndNod,freeNodes);
-            default: return true;}
-      }();
-      var fstOk = function () {
-         var _p16 = st;
-         switch (_p16.ctor)
-         {case "Put": return A2($List.member,fstNod,freeNodes);
-            case "HasMill": return A2($List.any,function (x) {    return _U.eq(x,fstNod);},pass.myFields) && $Basics.not(A2(isInMill,pass,fstNod));
-            case "Slide": return A2($List.member,fstNod,curr.myFields);
-            case "Jump": return A2($List.member,fstNod,curr.myFields);
-            default: return true;}
-      }();
-      var relOk = function () {
-         var _p17 = st;
-         switch (_p17.ctor)
-         {case "Slide": return !_U.eq(fstNod,sndNod);
-            case "Jump": return !_U.eq(fstNod,sndNod);
-            case "HasMill": return _U.eq(fstNod,sndNod);
-            case "Put": return _U.eq(fstNod,sndNod);
-            default: return true;}
-      }();
-      return relOk && (fstOk && sndOk);
-   });
-   var helper2 = function (id) {
-      var _p18 = A2($Graph.get,id,magic);
-      if (_p18.ctor === "Just") {
-            return $Graph.alongOutgoingEdges(_p18._0);
-         } else {
-            return _U.list([]);
-         }
    };
-   var checkMovement = F2(function (pl,dummy) {
-      var freeNodes = dummy.myFields;
-      var _p19 = pl.numOfStones;
-      if (_p19 === 3) {
-            return freeNodes;
-         } else {
-            var ls = A2($List.concatMap,helper2,pl.myFields);
-            var ls2 = A2($List.filter,function (x) {    return $Basics.not(A2($List.member,x,pl.myFields));},ls);
-            var ls3 = A2($List.filter,function (x) {    return A2($List.member,x,freeNodes);},ls2);
-            return ls3;
-         }
-   });
-   var helper = function (x) {
-      var _p20 = A2($Graph.get,x,magic);
-      if (_p20.ctor === "Just") {
-            var nod = _p20._0.node;
-            return {ctor: "_Tuple2",_0: nod.id,_1: nod.label};
-         } else {
-            return {ctor: "_Tuple2",_0: 0,_1: {ctor: "_Tuple3",_0: 0,_1: 0,_2: 0}};
-         }
-   };
-   var getNewMills = F2(function (pl,nod) {
-      var toTuple = function (ls) {
-         var _p21 = ls;
-         if (_p21.ctor === "::" && _p21._1.ctor === "::" && _p21._1._1.ctor === "::" && _p21._1._1._1.ctor === "[]") {
-               return $Maybe.Just({ctor: "_Tuple3",_0: _p21._0,_1: _p21._1._0,_2: _p21._1._1._0});
-            } else {
-               return $Maybe.Nothing;
-            }
-      };
-      var member$ = F2(function (x,ls) {
-         member$: while (true) {
-            var _p22 = ls;
-            if (_p22.ctor === "[]") {
-                  return $Maybe.Nothing;
-               } else {
-                  if (_U.eq(x,_p22._0._1)) return $Maybe.Just(_p22._0._0); else {
-                        var _v14 = x,_v15 = _p22._1;
-                        x = _v14;
-                        ls = _v15;
-                        continue member$;
-                     }
-               }
-         }
-      });
-      var put = F3(function (pos,_p23,x) {
-         var _p24 = _p23;
-         var _p27 = _p24._1;
-         var _p26 = _p24._0;
-         var _p25 = pos;
-         switch (_p25)
-         {case 0: return {ctor: "_Tuple3",_0: x,_1: _p26,_2: _p27};
-            case 1: return {ctor: "_Tuple3",_0: _p26,_1: x,_2: _p27};
-            default: return {ctor: "_Tuple3",_0: _p26,_1: _p27,_2: x};}
-      });
-      var select = function (x) {    var _p28 = x;switch (_p28) {case 0: return _U.list([1,2]);case 1: return _U.list([0,2]);default: return _U.list([0,1]);}};
-      var _p29 = $Basics.snd(helper(nod));
-      var a = _p29._0;
-      var b = _p29._1;
-      var c = _p29._2;
-      var max = F3(function (ns,num,val) {    return _U.cmp(num,3) < 0 ? A2($Basics._op["++"],ns,val) : val;});
-      var tupLs = A2($List.filter,
-      function (x) {
-         return A2($List.member,$Basics.fst(x),pl.myFields);
-      },
-      A2($List.map,helper$,$Basics.fst(A5($Graph.guidedBfs,$Graph.alongOutgoingEdges,max,_U.list([nod]),_U.list([]),magic))));
-      var decide = F3(function (pos,tup,z) {
-         var tupLs2 = A2($List.filterMap,function (x) {    return A2(member$,x,tupLs);},A2($List.map,A2(put,pos,tup),select(z)));
-         return _U.eq($List.length(tupLs2),2) ? A2($List._op["::"],nod,tupLs2) : _U.list([]);
-      });
-      var aMill = A3(decide,0,{ctor: "_Tuple2",_0: b,_1: c},a);
-      var bMill = A3(decide,1,{ctor: "_Tuple2",_0: a,_1: c},b);
-      var cMill = A3(decide,2,{ctor: "_Tuple2",_0: a,_1: b},c);
-      return A2($List.filterMap,toTuple,_U.list([aMill,bMill,cMill]));
-   });
-   var updateMills = F3(function (pl,oldId,newId) {
-      var ls2 = A2(getNewMills,pl,newId);
-      var ls = A2($List.filter,
-      function (_p30) {
-         var _p31 = _p30;
-         return !_U.eq(_p31._0,oldId) && (!_U.eq(_p31._1,oldId) && !_U.eq(_p31._2,oldId));
-      },
-      pl.mills);
-      return {ctor: "_Tuple2",_0: $Basics.not($List.isEmpty(ls2)),_1: $List.concat(A2($List._op["::"],ls2,_U.list([ls])))};
-   });
-   var wizard = $Model.initGame.machine;
-   var stepPlayer = F3(function (pl,oldId,newId) {
-      var st = $Model.wrapper$(pl);
-      var newPl = function () {
-         var _p32 = st;
-         switch (_p32.ctor)
-         {case "Put": var tmp = _U.update(pl,{numOfStonesInGame: pl.numOfStonesInGame + 1,myFields: A2($List._op["::"],newId,pl.myFields)});
-              var _p33 = A3(updateMills,tmp,oldId,newId);
-              var a = _p33._0;
-              var b = _p33._1;
-              return _U.update(tmp,{mills: b,closedMill: a});
-            case "Slide": var tmp = _U.update(pl,{myFields: A2($List._op["::"],newId,A2($List.filter,function (x) {    return !_U.eq(x,oldId);},pl.myFields))});
-              var _p34 = A3(updateMills,tmp,oldId,newId);
-              var a = _p34._0;
-              var b = _p34._1;
-              return _U.update(tmp,{mills: b,closedMill: a});
-            case "Jump": var tmp = _U.update(pl,{myFields: A2($List._op["::"],newId,A2($List.filter,function (x) {    return !_U.eq(x,oldId);},pl.myFields))});
-              var _p35 = A3(updateMills,tmp,oldId,newId);
-              var a = _p35._0;
-              var b = _p35._1;
-              return _U.update(tmp,{mills: b,closedMill: a});
-            case "HasMill": return _U.update(pl,{closedMill: false});
-            default: return pl;}
-      }();
-      return A2($Model.trans,newPl,wizard);
-   });
-   var stepPlayerS = F5(function (oldId,newId,curr,pass,dummy) {
-      var tmp = pass.numOfStones;
-      var newCurr = A3(stepPlayer,curr,oldId,newId);
-      var st = $Model.wrapper$(curr);
-      var _p36 = st;
-      switch (_p36.ctor)
-      {case "Put": return {ctor: "_Tuple3"
-                          ,_0: newCurr
-                          ,_1: pass
-                          ,_2: _U.update(dummy,{myFields: A2($List.filter,function (x) {    return !_U.eq(x,newId);},dummy.myFields)})};
-         case "Slide": return {ctor: "_Tuple3"
-                              ,_0: newCurr
-                              ,_1: pass
-                              ,_2: _U.update(dummy,
-                              {myFields: A2($List._op["::"],oldId,A2($List.filter,function (x) {    return !_U.eq(x,newId);},dummy.myFields))})};
-         case "Jump": return {ctor: "_Tuple3"
-                             ,_0: newCurr
-                             ,_1: pass
-                             ,_2: _U.update(dummy,
-                             {myFields: A2($List._op["::"],oldId,A2($List.filter,function (x) {    return !_U.eq(x,newId);},dummy.myFields))})};
-         case "HasMill": return {ctor: "_Tuple3"
-                                ,_0: newCurr
-                                ,_1: _U.update(pass,{myFields: A2($List.filter,function (x) {    return !_U.eq(x,newId);},pass.myFields),numOfStones: tmp - 1})
-                                ,_2: _U.update(dummy,{myFields: A2($List._op["::"],newId,dummy.myFields)})};
-         case "Check": var tmp_pass = _U.update(pass,{canMove: $Basics.not($List.isEmpty(A2(checkMovement,pass,dummy)))});
-           var newPass = A2($Model.trans,tmp_pass,wizard);
-           return {ctor: "_Tuple3"
-                  ,_0: _U.update(curr,{playing: false,canMove: $Basics.not($List.isEmpty(A2(checkMovement,curr,dummy)))})
-                  ,_1: _U.update(newPass,{playing: true})
-                  ,_2: dummy};
-         default: return {ctor: "_Tuple3",_0: newCurr,_1: pass,_2: dummy};}
-   });
-   var stepForward = F2(function (_p37,g) {
-      var _p38 = _p37;
-      var _p39 = g.pl1.playing ? {ctor: "_Tuple2",_0: g.pl1,_1: g.pl2} : {ctor: "_Tuple2",_0: g.pl2,_1: g.pl1};
-      var curr = _p39._0;
-      var opp = _p39._1;
-      var _p40 = A5(stepPlayerS,_p38._0,_p38._1,curr,opp,g.plx);
-      var one = _p40._0;
-      var two = _p40._1;
-      var three = _p40._2;
-      var _p41 = function () {
-         var _p42 = one.ty;
-         if (_p42.ctor === "White") {
-               return {ctor: "_Tuple2",_0: one,_1: two};
-            } else {
-               return {ctor: "_Tuple2",_0: two,_1: one};
-            }
-      }();
-      var newPl1 = _p41._0;
-      var newPl2 = _p41._1;
-      var newPlx = three;
-      var newStatus = _U.eq(one.state,$Model.endState) || _U.eq(two.state,$Model.endState) ? $Model.Win : _U.eq(one.numOfStones,3) && _U.eq(two.numOfStones,
-      3) ? $Model.Draw : $Model.OnGoing;
-      return _U.update(g,{pl1: newPl1,pl2: newPl2,plx: newPlx,status: newStatus});
-   });
-   var fastForward = F2(function (inp,g) {
-      fastForward: while (true) {
-         var _p43 = g.pl1.playing ? {ctor: "_Tuple2",_0: g.pl1,_1: g.pl2} : {ctor: "_Tuple2",_0: g.pl2,_1: g.pl1};
-         var curr = _p43._0;
-         var opp = _p43._1;
-         var valid = A5(validTurns,curr,opp,g.plx,$Basics.fst(inp),$Basics.snd(inp));
-         var st = $Model.wrapper$(curr);
-         if (valid) {
-               var _p44 = st;
-               switch (_p44.ctor)
-               {case "PseudoMove": return A2(stepForward,inp,g);
-                  case "PseudoTake": var g1 = A2(stepForward,inp,g);
-                    var curr = g1.pl1.playing ? g1.pl1 : g1.pl2;
-                    var _p45 = $Model.wrapper$(curr);
-                    if (_p45.ctor === "HasMill") {
-                          return g1;
-                       } else {
-                          var _v26 = inp,_v27 = g1;
-                          inp = _v26;
-                          g = _v27;
-                          continue fastForward;
-                       }
-                  case "EndSt": return g;
-                  default: var g1 = A2(stepForward,inp,g);
-                    var _v28 = inp,_v29 = g1;
-                    inp = _v28;
-                    g = _v29;
-                    continue fastForward;}
-            } else return g;
-      }
-   });
-   var stepGame = F2(function (input,g) {
-      var g$ = _U.update(g,{fstNod: $Maybe.Nothing});
-      var fstNod = g.fstNod;
-      var _p46 = g.pl1.playing ? {ctor: "_Tuple2",_0: g.pl1,_1: g.pl2} : {ctor: "_Tuple2",_0: g.pl2,_1: g.pl1};
-      var curr = _p46._0;
-      var opp = _p46._1;
-      var st = $Model.wrapper$(curr);
-      var ls = g.view.coords;
-      var mybNod = A2($Maybe.andThen,$List.head(A2($List.filterMap,A2(withinRange,input,10),ls)),function (x) {    return A2($Dict.get,x,g.view.coordToNode);});
-      var _p47 = st;
-      switch (_p47.ctor)
-      {case "Jump": var _p48 = fstNod;
-           if (_p48.ctor === "Nothing") {
-                 return _U.update(g$,{fstNod: mybNod});
-              } else {
-                 var _p49 = mybNod;
-                 if (_p49.ctor === "Nothing") {
-                       return g$;
-                    } else {
-                       return A2(fastForward,{ctor: "_Tuple2",_0: _p48._0,_1: _p49._0},g$);
-                    }
-              }
-         case "Slide": var _p50 = fstNod;
-           if (_p50.ctor === "Nothing") {
-                 return _U.update(g$,{fstNod: mybNod});
-              } else {
-                 var _p51 = mybNod;
-                 if (_p51.ctor === "Nothing") {
-                       return g$;
-                    } else {
-                       return A2(fastForward,{ctor: "_Tuple2",_0: _p50._0,_1: _p51._0},g$);
-                    }
-              }
-         case "HasMill": var _p52 = mybNod;
-           if (_p52.ctor === "Nothing") {
-                 return g$;
-              } else {
-                 var _p53 = _p52._0;
-                 return A2(fastForward,{ctor: "_Tuple2",_0: _p53,_1: _p53},g$);
-              }
-         case "Put": var _p54 = mybNod;
-           if (_p54.ctor === "Nothing") {
-                 return g$;
-              } else {
-                 var _p55 = _p54._0;
-                 return A2(fastForward,{ctor: "_Tuple2",_0: _p55,_1: _p55},g$);
-              }
-         default: return A2(fastForward,{ctor: "_Tuple2",_0: 0,_1: 0},g$);}
-   });
-   var gameState = A3($Signal.foldp,stepGame,$Model.initGame,$Inputs.input);
-   var main = A3($Signal.map2,display,gameState,$Mouse.position);
-   return _elm.Update.values = {_op: _op
-                               ,wizard: wizard
-                               ,magic: magic
-                               ,dragon: dragon
-                               ,isInMill: isInMill
-                               ,helper3: helper3
-                               ,checkMovement: checkMovement
-                               ,validTurns: validTurns
-                               ,helper2: helper2
-                               ,getNewMills: getNewMills
-                               ,helper$: helper$
-                               ,helper: helper
-                               ,updateMills: updateMills
-                               ,stepPlayer: stepPlayer
-                               ,stepPlayerS: stepPlayerS
-                               ,stepForward: stepForward
-                               ,fastForward: fastForward
-                               ,stepGame: stepGame
-                               ,gameState: gameState
-                               ,display: display
-                               ,displayOngoing: displayOngoing
-                               ,displayWin: displayWin
-                               ,displayDraw: displayDraw
-                               ,main: main
-                               ,realField: realField
-                               ,withinRange: withinRange
-                               ,showPlayer: showPlayer};
-};</script></head><body><script type="text/javascript">Elm.fullscreen(Elm.Update)</script></body></html>
+   var main = A2($Signal.map,display,$Update.gameState);
+   return _elm.View.values = {_op: _op
+                             ,display: display
+                             ,displayOngoing: displayOngoing
+                             ,displayWin: displayWin
+                             ,displayDraw: displayDraw
+                             ,realField: realField
+                             ,showPlayer: showPlayer
+                             ,main: main};
+};</script></head><body><script type="text/javascript">Elm.fullscreen(Elm.View)</script></body></html>

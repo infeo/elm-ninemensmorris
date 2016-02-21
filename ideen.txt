@@ -17,8 +17,6 @@ Markiere gewählte Steine der möglichen Züge farbig
 
 Baue KI (setzte zufällig Steine, versuche gegnerische Mühle zu verhindern & vervollständige eigene Mühle)
 
-Lade alles auf Github
-
 Baue einen "Erneut spielen"-Knopf ein
 
 
