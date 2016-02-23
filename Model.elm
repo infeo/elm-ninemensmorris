@@ -1,13 +1,10 @@
 module Model (..) where
 
-import Maybe
 import Statey exposing (..)
 import Board
 import Graph exposing (..)
 import Result
-
-
---idee:
+import Maybe
 
 
 type alias Mill =
@@ -170,6 +167,7 @@ millMachine =
       , { from = pseudoMoveState, to = jumpState, fn = \pl -> pl.numOfStones == 3 && pl.numOfStonesInGame == 9 }
       , { from = pseudoTakeState, to = checkState, fn = \pl -> not pl.closedMill }
       , { from = pseudoTakeState, to = hasMillState, fn = \pl -> pl.closedMill }
+        -- add Constraint, that there must be a stone you can take
       , { from = checkState, to = endState, fn = \pl -> pl.numOfStonesInGame == 9 && (pl.numOfStones < 3 || not pl.canMove) }
       , { from = checkState, to = pseudoMoveState, fn = \pl -> pl.numOfStonesInGame < 9 || (pl.numOfStones >= 3 && pl.canMove) }
       ]
@@ -198,7 +196,12 @@ type Status
 
 automatedStateSelect : StateMachine Player -> Player -> List Player
 automatedStateSelect m pl =
-  List.filterMap (\s -> Result.toMaybe (transition m s pl)) (getStates m)
+  let
+    checkTransition =
+      \st ->
+        Result.toMaybe (transition m st pl)
+  in
+    List.filterMap checkTransition (getStates m)
 
 
 
@@ -208,7 +211,11 @@ automatedStateSelect m pl =
 
 trans : Player -> StateMachine Player -> Player
 trans pl m =
-  Maybe.withDefault pl (List.head (automatedStateSelect m pl))
+  let
+    stLs =
+      automatedStateSelect m pl
+  in
+    Maybe.withDefault pl (List.head stLs)
 
 
 wrapper : { a | state : State } -> State

@@ -7,7 +7,8 @@ import Dict
 import Signal
 import List
 import Maybe exposing (..)
-import Debug
+import Debug exposing (crash)
+
 
 --for easy use
 
@@ -99,7 +100,7 @@ validTurns curr pass dummy fstNod sndNod =
                 List.any (\x -> x == sndNod) (List.filter (\x -> List.member x freeNodes) (alongOutgoingEdges ctx))
 
               Nothing ->
-                Debug.crash "IMPOSSIBLE"
+                False
 
         HasMill ->
           List.any (\x -> x == sndNod) pass.myFields && not (isInMill pass sndNod)
@@ -251,7 +252,7 @@ getNewMills pl nod =
             Just ( x, y, z )
 
           _ ->
-            Debug.crash "IMPOSSIBLE"
+            Nothing
 
     aMill =
       (decide 0 ( b, c ) a)
@@ -285,7 +286,7 @@ helper x =
         ( nod.id, nod.label )
 
     Nothing ->
-      Debug.crash "IMPOSSIBLE"
+      crash "IMPOSSIBLE: every NodeId is in the fraph (no deletion of nodes)"
 
 
 updateMills : Player -> NodeId -> NodeId -> ( Bool, List Mill )
@@ -603,7 +604,11 @@ stepGame input g =
             fastForward ( u, u ) g'
 
       _ ->
-        Debug.crash "IMPOSSIBLE"
+        fastForward ( 0, 0 ) g'
+
+
+
+--ugly
 
 
 gameState : Signal.Signal Game
