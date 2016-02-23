@@ -8,6 +8,7 @@ import List
 import Model exposing (..)
 import Update
 
+
 display : Game -> Element
 display g =
   case g.status of
@@ -84,6 +85,7 @@ displayDraw =
         500
         500
         [ toForm (show "Draw!") ]
+
 
 showPlayer : Player -> Form
 showPlayer pl =

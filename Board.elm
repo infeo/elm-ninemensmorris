@@ -1,4 +1,4 @@
-module Board (board, nodeList, realView, View) where
+module Board (nodeList, realView, View) where
 
 import Graph exposing (..)
 import Dict
@@ -6,6 +6,7 @@ import Array
 import List
 import Graphics.Collage exposing (..)
 import Color
+
 
 --represent the mill-gameBoard as a Graph
 {-
@@ -126,12 +127,12 @@ merger from to outgoingLabel incomingLabel =
 
 
 type alias View =
-  { abstractRep : Graph (Int,Int,Int) String, concreteRep : Form, coords : List ( Int, Int ), pt : List NodeId, coordToNode : Dict.Dict ( Int, Int ) Int, nodeToCoord : Array.Array ( Int, Int ) }
+  { abstractRep : Graph ( Int, Int, Int ) String, concreteRep : Form, coords : List ( Int, Int ), pt : List NodeId, coordToNode : Dict.Dict ( Int, Int ) Int, nodeToCoord : Array.Array ( Int, Int ) }
 
 
 realView : View
 realView =
-    { abstractRep = symmetricClosure merger (tmp), concreteRep = realField, coords = ordCoord, pt = nodeList, coordToNode = chainCoordToNode ordCoord nodeList start, nodeToCoord = chainNodeToCoord ordCoord }
+  { abstractRep = symmetricClosure merger (tmp), concreteRep = realField, coords = ordCoord, pt = nodeList, coordToNode = chainCoordToNode ordCoord nodeList start, nodeToCoord = chainNodeToCoord ordCoord }
 
 
 ordCoord : List ( Int, Int )
@@ -176,6 +177,7 @@ chainCoordToNode xs ys dic =
 chainNodeToCoord : List ( Int, Int ) -> Array.Array ( Int, Int )
 chainNodeToCoord =
   Array.fromList
+
 
 realField : Form
 realField =

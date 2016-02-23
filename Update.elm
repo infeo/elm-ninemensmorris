@@ -16,6 +16,7 @@ import Debug exposing (crash)
 wizard =
   initGame.machine
 
+
 magic =
   (initGame.view).abstractRep
 
@@ -32,13 +33,13 @@ isInMill : Player -> NodeId -> Bool
 isInMill pl nodeId =
   let
     ls =
-      List.concatMap helper3 pl.mills
+      List.concatMap fromTupToList pl.mills
   in
     List.member nodeId ls
 
 
-helper3 : ( a, a, a ) -> List a
-helper3 ( one, two, three ) =
+fromTupToList : ( a, a, a ) -> List a
+fromTupToList ( one, two, three ) =
   [ one, two, three ]
 
 
@@ -55,7 +56,7 @@ checkMovement pl dummy =
       _ ->
         let
           ls =
-            List.concatMap helper2 pl.myFields
+            List.concatMap fromIdToNeighbours pl.myFields
 
           --alle erreichbaren Knoten, wenn der Spieler nur schieben kann
           ls2 =
@@ -74,11 +75,14 @@ checkMovement pl dummy =
 -- returns True if the selected nodes are ok
 
 
-validTurns : Player -> Player -> Player -> NodeId -> NodeId -> Bool
-validTurns curr pass dummy fstNod sndNod =
+validTurns : Game -> NodeId -> NodeId -> Bool
+validTurns g fstNod sndNod =
   let
-    st =
-      wrapper' curr
+    ( st, curr, opp ) =
+      allUNeed g
+
+    dummy =
+      g.plx
 
     freeNodes =
       dummy.myFields
@@ -97,13 +101,7 @@ validTurns curr pass dummy fstNod sndNod =
               Nothing ->
                 False
 
-        HasMill ->
-          List.any (\x -> x == sndNod) pass.myFields && not (isInMill pass sndNod)
-
         Jump ->
-          List.member sndNod freeNodes
-
-        Put ->
           List.member sndNod freeNodes
 
         _ ->
@@ -115,7 +113,10 @@ validTurns curr pass dummy fstNod sndNod =
           List.member fstNod freeNodes
 
         HasMill ->
-          List.any (\x -> x == fstNod) pass.myFields && not (isInMill pass fstNod)
+          if List.length opp.myFields == List.length (List.concatMap fromTupToList opp.mills) then
+            List.any (\x -> x == fstNod) opp.myFields
+          else
+            List.any (\x -> x == fstNod) opp.myFields && not (isInMill opp fstNod)
 
         Slide ->
           List.member fstNod curr.myFields
@@ -146,8 +147,8 @@ validTurns curr pass dummy fstNod sndNod =
     relOk && fstOk && sndOk
 
 
-helper2 : NodeId -> List NodeId
-helper2 id =
+fromIdToNeighbours : NodeId -> List NodeId
+fromIdToNeighbours id =
   case (get id magic) of
     Just ctx ->
       alongOutgoingEdges ctx
@@ -158,21 +159,17 @@ helper2 id =
 
 
 {-
-     Only works with magic
-   Kombis für jede Komponente: (0,2) (0,1) (1,2)
-   Je nach Bedarf muss vorne hinten oder in der Mitte eingefügt werden
-   Dann überprüft man, ob die Elemente in der Liste sind.
-   Dann braucht man wieder die KnotenIds
+        Only works with magic
+      Kombis für jede Komponente: (0,2) (0,1) (1,2)
+      Je nach Bedarf muss vorne hinten oder in der Mitte eingefügt werden
+      Dann überprüft man, ob die Elemente in der Liste sind.
+      Dann braucht man wieder die KnotenIds
+   --remeber: in the put State you can get two mills with  one stone
+
 -}
 
 
 getNewMills : Player -> NodeId -> List Mill
-
-
-
---remeber: in the put State you can get two mills with  one stone
-
-
 getNewMills pl nod =
   let
     max =
@@ -183,11 +180,11 @@ getNewMills pl nod =
           val
 
     tupLs =
-      List.filter (\x -> List.member (fst x) pl.myFields) (List.map helper' (fst (guidedBfs alongOutgoingEdges max [ nod ] [] magic)))
+      List.filter (\x -> List.member (fst x) pl.myFields) (List.map fromContextToIdLabel (fst (guidedBfs alongOutgoingEdges max [ nod ] [] magic)))
 
     --Liste von (NodId, Labels)
     ( a, b, c ) =
-      snd (helper nod)
+      snd (fromIdToIdLabel nod)
 
     --Koordinaten des Punktes als Label
     select =
@@ -261,8 +258,8 @@ getNewMills pl nod =
     List.filterMap toTuple [ aMill, bMill, cMill ]
 
 
-helper' : NodeContext ( Int, Int, Int ) String -> ( NodeId, ( Int, Int, Int ) )
-helper' ctx =
+fromContextToIdLabel : NodeContext ( Int, Int, Int ) String -> ( NodeId, ( Int, Int, Int ) )
+fromContextToIdLabel ctx =
   let
     nod =
       ctx.node
@@ -270,8 +267,8 @@ helper' ctx =
     ( nod.id, nod.label )
 
 
-helper : NodeId -> ( NodeId, ( Int, Int, Int ) )
-helper x =
+fromIdToIdLabel : NodeId -> ( NodeId, ( Int, Int, Int ) )
+fromIdToIdLabel x =
   case (get x magic) of
     Just ctx ->
       let
@@ -281,7 +278,7 @@ helper x =
         ( nod.id, nod.label )
 
     Nothing ->
-      crash "IMPOSSIBLE: every NodeId is in the fraph (no deletion of nodes)"
+      crash "IMPOSSIBLE: a nodeId is never deleted"
 
 
 updateMills : Player -> NodeId -> NodeId -> ( Bool, List Mill )
@@ -368,32 +365,35 @@ stepPlayer pl oldId newId =
 -}
 
 
-stepPlayerS : NodeId -> NodeId -> Player -> Player -> Player -> ( Player, Player, Player )
-stepPlayerS oldId newId curr pass dummy =
+stepPlayerS : NodeId -> NodeId -> Game -> ( Player, Player, Player )
+stepPlayerS oldId newId g =
   let
-    st =
-      wrapper' curr
+    ( st, curr, opp ) =
+      allUNeed g
+
+    dummy =
+      g.plx
 
     newCurr =
       stepPlayer curr oldId newId
 
     tmp =
-      pass.numOfStones
+      opp.numOfStones
   in
     case st of
       Put ->
-        ( newCurr, pass, { dummy | myFields = List.filter (\x -> x /= newId) dummy.myFields } )
+        ( newCurr, opp, { dummy | myFields = List.filter (\x -> x /= newId) dummy.myFields } )
 
       Slide ->
-        ( newCurr, pass, { dummy | myFields = oldId :: (List.filter (\x -> x /= newId) dummy.myFields) } )
+        ( newCurr, opp, { dummy | myFields = oldId :: (List.filter (\x -> x /= newId) dummy.myFields) } )
 
       Jump ->
-        ( newCurr, pass, { dummy | myFields = oldId :: (List.filter (\x -> x /= newId) dummy.myFields) } )
+        ( newCurr, opp, { dummy | myFields = oldId :: (List.filter (\x -> x /= newId) dummy.myFields) } )
 
       HasMill ->
         ( newCurr
-        , { pass
-            | myFields = List.filter (\x -> x /= newId) pass.myFields
+        , { opp
+            | myFields = List.filter (\x -> x /= newId) opp.myFields
             , numOfStones = tmp - 1
           }
         , { dummy | myFields = newId :: (dummy.myFields) }
@@ -401,35 +401,29 @@ stepPlayerS oldId newId curr pass dummy =
 
       Check ->
         let
-          tmp_pass =
-            { pass | canMove = not (List.isEmpty <| checkMovement pass dummy) }
+          tmp_opp =
+            { opp | canMove = not (List.isEmpty <| checkMovement opp dummy) }
 
-          newPass =
-            trans tmp_pass wizard
+          newOpp =
+            trans tmp_opp wizard
         in
           ( { curr
               | playing = False
               , canMove = not (List.isEmpty <| checkMovement curr dummy)
             }
-          , { newPass | playing = True }
+          , { newOpp | playing = True }
           , dummy
           )
 
       _ ->
-        ( newCurr, pass, dummy )
+        ( newCurr, opp, dummy )
 
 
 stepForward : ( NodeId, NodeId ) -> Game -> Game
 stepForward ( fstNode, sndNode ) g =
   let
-    ( curr, opp ) =
-      if g.pl1.playing then
-        ( g.pl1, g.pl2 )
-      else
-        ( g.pl2, g.pl1 )
-
-    ( one, two, three ) =
-      stepPlayerS fstNode sndNode curr opp g.plx
+    ( one, two, newPlx ) =
+      stepPlayerS fstNode sndNode g
 
     ( newPl1, newPl2 ) =
       case one.ty of
@@ -438,9 +432,6 @@ stepForward ( fstNode, sndNode ) g =
 
         _ ->
           ( two, one )
-
-    newPlx =
-      three
 
     newStatus =
       if (one.state == endState || two.state == endState) then
@@ -466,17 +457,11 @@ stepForward ( fstNode, sndNode ) g =
 fastForward : ( NodeId, NodeId ) -> Game -> Game
 fastForward inp g =
   let
-    ( curr, opp ) =
-      if g.pl1.playing then
-        ( g.pl1, g.pl2 )
-      else
-        ( g.pl2, g.pl1 )
+    ( st, curr, opp ) =
+      allUNeed g
 
     valid =
-      validTurns curr opp g.plx (fst inp) (snd inp)
-
-    st =
-      wrapper' curr
+      validTurns g (fst inp) (snd inp)
   in
     if valid then
       case st of
@@ -522,10 +507,6 @@ withinRange ( x, y ) delta ( a, b ) =
     Nothing
 
 
-
--- with this implementation the function validTurns can be refactored
-
-
 stepGame : Input -> Game -> Game
 stepGame input g =
   let
@@ -535,14 +516,8 @@ stepGame input g =
     mybNod =
       List.head (List.filterMap (withinRange input 10) ls) `andThen` (\x -> Dict.get x (g.view).coordToNode)
 
-    ( curr, opp ) =
-      if g.pl1.playing then
-        ( g.pl1, g.pl2 )
-      else
-        ( g.pl2, g.pl1 )
-
-    st =
-      wrapper' curr
+    ( st, curr, opp ) =
+      allUNeed g
 
     fstNod =
       g.fstNod
@@ -609,3 +584,15 @@ stepGame input g =
 gameState : Signal.Signal Game
 gameState =
   Signal.foldp stepGame initGame input
+
+
+allUNeed : Game -> ( FakeState, Player, Player )
+allUNeed g =
+  let
+    ( curr, opp ) =
+      if g.pl1.playing then
+        ( g.pl1, g.pl2 )
+      else
+        ( g.pl2, g.pl1 )
+  in
+    ( wrapper' curr, curr, opp )
