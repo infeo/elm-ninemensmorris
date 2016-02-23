@@ -7,6 +7,7 @@ import Dict
 import Signal
 import List
 import Maybe exposing (..)
+import Debug exposing (crash)
 
 
 --for easy use
@@ -100,8 +101,6 @@ validTurns curr pass dummy fstNod sndNod =
 
               Nothing ->
                 False
-
-        --you'll never get here
         HasMill ->
           List.any (\x -> x == sndNod) pass.myFields && not (isInMill pass sndNod)
 
@@ -253,8 +252,6 @@ getNewMills pl nod =
 
           _ ->
             Nothing
-
-    -- again a point, where the programm will never come to
     aMill =
       (decide 0 ( b, c ) a)
 
@@ -299,12 +296,7 @@ helper x =
         ( nod.id, nod.label )
 
     Nothing ->
-      ( 0, ( 0, 0, 0 ) )
-
-
-
--- VERY UGLY, but impossible to get here,  i'm supposed to write something
-
+      crash "IMPOSSIBLE: every NodeId is in the fraph (no deletion of nodes)"
 
 updateMills : Player -> NodeId -> NodeId -> ( Bool, List Mill )
 updateMills pl oldId newId =
@@ -621,12 +613,7 @@ stepGame input g =
             fastForward ( u, u ) g'
 
       _ ->
-        fastForward ( 0, 0 ) g'
-
-
-
--- UGLY
-
+        fastForward ( 0, 0 ) g' --ugly
 
 gameState : Signal.Signal Game
 gameState =

@@ -173,24 +173,9 @@ start =
 
 chainCoordToNode : List ( Int, Int ) -> List NodeId -> Dict.Dict ( Int, Int ) NodeId -> Dict.Dict ( Int, Int ) NodeId
 chainCoordToNode xs ys dic =
-  List.foldr (\( a, b ) c -> Dict.insert a b c) dic (zip xs ys)
+  Dict.fromList (List.map2 (,) xs ys)
 
 
 chainNodeToCoord : List ( Int, Int ) -> Array.Array ( Int, Int )
 chainNodeToCoord =
   Array.fromList
-
-
-zip : List a -> List b -> List ( a, b )
-zip xs ys =
-  case xs of
-    [] ->
-      []
-
-    v :: vs ->
-      case ys of
-        [] ->
-          []
-
-        w :: ws ->
-          ( v, w ) :: (zip vs ws)

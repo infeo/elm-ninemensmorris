@@ -3,15 +3,12 @@ module Model (..) where
 import Statey exposing (..)
 import Board
 import Graph exposing (..)
-
-
---idee:
+import Result
+import Maybe
 
 
 type alias Mill =
   ( NodeId, NodeId, NodeId )
-
-
 
 --the Game & init of it
 
@@ -196,18 +193,13 @@ type Status
 
 
 automatedStateSelect : StateMachine Player -> Player -> List Player
-automatedStateSelect m r =
+automatedStateSelect m pl =
   let
-    checkTran =
+    checkTransition =
       \st ->
-        case transition m st r of
-          Ok val ->
-            Just val
-
-          Err err ->
-            Nothing
+         Result.toMaybe (transition m st pl) 
   in
-    List.filterMap checkTran (getStates m)
+    List.filterMap checkTransition (getStates m)
 
 
 
@@ -217,12 +209,10 @@ automatedStateSelect m r =
 
 trans : Player -> StateMachine Player -> Player
 trans pl m =
-  case List.head (automatedStateSelect m pl) of
-    Just newPl ->
-      newPl
-
-    Nothing ->
-      pl
+  let 
+    stLs = automatedStateSelect m pl
+  in 
+    Maybe.withDefault pl (List.head stLs)
 
 
 wrapper : { a | state : State } -> State
