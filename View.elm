@@ -53,7 +53,7 @@ displayOngoing g =
       <| collage
           500
           500
-          [ realField
+          [ view.concreteRep
           , showPlayer pl1 |> move ( -100, 175 )
           , showPlayer pl2 |> move ( 100, 175 )
           , toForm (show g.status)
@@ -85,23 +85,6 @@ displayDraw =
         500
         500
         [ toForm (show "Draw!") ]
-
-
-realField : Form
-realField =
-  group
-    [ filled Color.grey (square 400)
-    , outlined defaultLine (square 300.0)
-      -- 50 * 3 = 150
-    , outlined defaultLine (square 195.0)
-      -- 32.5 *3 = 90+6+1.5 = 97.5
-    , outlined defaultLine (square 90.0)
-      -- 15 * 3 = 30+15= 45
-    , traced defaultLine (segment ( -150, 0 ) ( -45, 0 ))
-    , traced defaultLine (segment ( 45, 0 ) ( 150, 0 ))
-    , traced defaultLine (segment ( 0, 45 ) ( 0, 150 ))
-    , traced defaultLine (segment ( 0, -150 ) ( 0, -45 ))
-    ]
 
 
 showPlayer : Player -> Form

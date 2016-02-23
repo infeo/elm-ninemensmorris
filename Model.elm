@@ -21,7 +21,6 @@ type alias Game =
   , plx : Player
   , machine : StateMachine Player
   , status : Status
-  , board : Graph ( Int, Int, Int ) String
   , view : Board.View
   , fstNod : Maybe NodeId
   }
@@ -34,7 +33,6 @@ initGame =
   , plx = noOne
   , machine = millMachine
   , status = OnGoing
-  , board = Board.board
   , view = Board.realView
   , fstNod = Nothing
   }
@@ -167,7 +165,6 @@ millMachine =
       , { from = pseudoMoveState, to = jumpState, fn = \pl -> pl.numOfStones == 3 && pl.numOfStonesInGame == 9 }
       , { from = pseudoTakeState, to = checkState, fn = \pl -> not pl.closedMill }
       , { from = pseudoTakeState, to = hasMillState, fn = \pl -> pl.closedMill }
-        -- add Constraint, that there must be a stone you can take
       , { from = checkState, to = endState, fn = \pl -> pl.numOfStonesInGame == 9 && (pl.numOfStones < 3 || not pl.canMove) }
       , { from = checkState, to = pseudoMoveState, fn = \pl -> pl.numOfStonesInGame < 9 || (pl.numOfStones >= 3 && pl.canMove) }
       ]

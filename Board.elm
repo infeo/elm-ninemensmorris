@@ -1,9 +1,11 @@
-module Board (board, nodeList, realView, View) where
+module Board (nodeList, realView, View) where
 
 import Graph exposing (..)
 import Dict
 import Array
 import List
+import Graphics.Collage exposing (..)
+import Color
 
 
 --represent the mill-gameBoard as a Graph
@@ -125,16 +127,12 @@ merger from to outgoingLabel incomingLabel =
 
 
 type alias View =
-  { coords : List ( Int, Int ), pt : List NodeId, coordToNode : Dict.Dict ( Int, Int ) Int, nodeToCoord : Array.Array ( Int, Int ) }
+  { abstractRep : Graph ( Int, Int, Int ) String, concreteRep : Form, coords : List ( Int, Int ), pt : List NodeId, coordToNode : Dict.Dict ( Int, Int ) Int, nodeToCoord : Array.Array ( Int, Int ) }
 
 
 realView : View
 realView =
-  let
-    tmp =
-      nodeList
-  in
-    { coords = ordCoord, pt = tmp, coordToNode = chainCoordToNode ordCoord tmp start, nodeToCoord = chainNodeToCoord ordCoord }
+  { abstractRep = symmetricClosure merger (tmp), concreteRep = realField, coords = ordCoord, pt = nodeList, coordToNode = chainCoordToNode ordCoord nodeList start, nodeToCoord = chainNodeToCoord ordCoord }
 
 
 ordCoord : List ( Int, Int )
@@ -179,3 +177,17 @@ chainCoordToNode xs ys dic =
 chainNodeToCoord : List ( Int, Int ) -> Array.Array ( Int, Int )
 chainNodeToCoord =
   Array.fromList
+
+
+realField : Form
+realField =
+  group
+    [ filled Color.grey (square 400)
+    , outlined defaultLine (square 300.0)
+    , outlined defaultLine (square 195.0)
+    , outlined defaultLine (square 90.0)
+    , traced defaultLine (segment ( -150, 0 ) ( -45, 0 ))
+    , traced defaultLine (segment ( 45, 0 ) ( 150, 0 ))
+    , traced defaultLine (segment ( 0, 45 ) ( 0, 150 ))
+    , traced defaultLine (segment ( 0, -150 ) ( 0, -45 ))
+    ]
