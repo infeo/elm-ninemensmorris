@@ -16,13 +16,8 @@ import Debug exposing (crash)
 wizard =
   initGame.machine
 
-
-
--- : StateMachine Player
-
-
 magic =
-  initGame.board
+  (initGame.view).abstractRep
 
 
 dragon =

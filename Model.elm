@@ -21,7 +21,6 @@ type alias Game =
   , plx : Player
   , machine : StateMachine Player
   , status : Status
-  , board : Graph ( Int, Int, Int ) String
   , view : Board.View
   , fstNod : Maybe NodeId
   }
@@ -34,7 +33,6 @@ initGame =
   , plx = noOne
   , machine = millMachine
   , status = OnGoing
-  , board = Board.board
   , view = Board.realView
   , fstNod = Nothing
   }
