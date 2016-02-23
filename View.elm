@@ -7,6 +7,7 @@ import Array
 import List
 import Model exposing (..)
 import Update
+import Maybe
 
 
 display : Game -> Element
@@ -39,7 +40,13 @@ displayOngoing g =
         pl1
       else
         pl2
-
+    
+    myLineStyle =let tmp = solid Color.red
+                 in {tmp | width = 5.0}
+    markedStone = case g.fstNod `Maybe.andThen` (\id -> Array.get id view.nodeToCoord) of
+                    Just (x,y) -> move ( toFloat x, toFloat (-y) ) <| outlined (myLineStyle) <| circle 10 
+                    Nothing -> filled (Color.hsla (degrees 0) 1 0.5 0)  <| circle 10
+    
     whiteStones =
       List.filterMap (\x -> Array.get x view.nodeToCoord) pl1.myFields
 
@@ -56,7 +63,8 @@ displayOngoing g =
           [ view.concreteRep
           , showPlayer pl1 |> move ( -100, 175 )
           , showPlayer pl2 |> move ( 100, 175 )
-          , toForm (show g.status)
+          --, toForm (show g.status)
+          , markedStone
           , showStones Color.white whiteStones
           , showStones Color.black blackStones
           ]
