@@ -10,6 +10,8 @@ import Maybe
 type alias Mill =
   ( NodeId, NodeId, NodeId )
 
+
+
 --the Game & init of it
 
 
@@ -197,7 +199,7 @@ automatedStateSelect m pl =
   let
     checkTransition =
       \st ->
-         Result.toMaybe (transition m st pl) 
+        Result.toMaybe (transition m st pl)
   in
     List.filterMap checkTransition (getStates m)
 
@@ -209,9 +211,10 @@ automatedStateSelect m pl =
 
 trans : Player -> StateMachine Player -> Player
 trans pl m =
-  let 
-    stLs = automatedStateSelect m pl
-  in 
+  let
+    stLs =
+      automatedStateSelect m pl
+  in
     Maybe.withDefault pl (List.head stLs)
 
 

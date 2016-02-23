@@ -101,6 +101,7 @@ validTurns curr pass dummy fstNod sndNod =
 
               Nothing ->
                 False
+
         HasMill ->
           List.any (\x -> x == sndNod) pass.myFields && not (isInMill pass sndNod)
 
@@ -252,6 +253,7 @@ getNewMills pl nod =
 
           _ ->
             Nothing
+
     aMill =
       (decide 0 ( b, c ) a)
 
@@ -297,6 +299,7 @@ helper x =
 
     Nothing ->
       crash "IMPOSSIBLE: every NodeId is in the fraph (no deletion of nodes)"
+
 
 updateMills : Player -> NodeId -> NodeId -> ( Bool, List Mill )
 updateMills pl oldId newId =
@@ -613,7 +616,12 @@ stepGame input g =
             fastForward ( u, u ) g'
 
       _ ->
-        fastForward ( 0, 0 ) g' --ugly
+        fastForward ( 0, 0 ) g'
+
+
+
+--ugly
+
 
 gameState : Signal.Signal Game
 gameState =
