@@ -20,9 +20,11 @@ display g =
     Draw ->
       displayDraw
 
-    _ ->
+    Win ->
       displayWin g
-
+      
+    _ ->
+      displayInit
 
 displayOngoing : Game -> Element
 displayOngoing g =
@@ -70,23 +72,6 @@ displayOngoing g =
           , showStones Color.black blackStones
           ]
 
-
-displayWin : Game -> Element
-displayWin g =
-  let
-    winner =
-      if g.pl1.state == endState then
-        "Player 2 wins"
-      else
-        "Player 1 wins"
-  in
-    container 600 600 middle
-      <| collage
-          500
-          500
-          [ toForm (show winner) ]
-
-
 displayDraw : Element
 displayDraw =
   container 600 600 middle
@@ -96,7 +81,30 @@ displayDraw =
         [ toForm (show "Draw!")  |> move (0,20)
         , replayBut |> move (0,-20)
         ]
+        
+        
+displayWin : Game -> Element
+displayWin g =
+  let
+    winner = case wrapper' g.pl1 of
+                End -> "Player 2 wins"
+                _ -> "Player 1 wins"
+  in
+    container 600 600 middle
+      <| collage
+          500
+          500
+          [ toForm (show winner) |> move (0,20)
+          , replayBut |> move (0,-20)
+          ]
 
+displayInit : Element
+displayInit =
+  container 600 600 middle
+    <| collage
+        500
+        500
+        [startBut]
 
 showPlayer : Player -> Form
 showPlayer pl =
@@ -115,24 +123,24 @@ showPlayer pl =
       , ma pl.mills |> move ( 0, 70 )
       ]
 
---Replay Button not working properly
--- mailbox must be set back
+
+startBut : Form
+startBut = toForm <| button (Signal.message (buttonBox.address) False) "Start"
 
 replayBut : Form
-replayBut = toForm <| button (Signal.message (replayBox.address) True)   "Replay"
+replayBut = toForm <| button (Signal.message (buttonBox.address) True) "Replay?"
 
-replayBox : Signal.Mailbox Bool
-replayBox = Signal.mailbox False
+buttonBox : Signal.Mailbox Bool
+buttonBox = Signal.mailbox True
 
 
+gui : Signal.Signal Game
+gui = Signal.foldp reset initGame (Signal.map2 (,) Inputs.input buttonBox.signal)
 
-test : Signal.Signal Game
-test = Signal.foldp function initGame (Signal.map2 (,) Inputs.input replayBox.signal)
-
-function : ((Int,Int),Bool) -> Game -> Game
-function (click,replay) g = if replay then initGame else Update.stepGame click g
+reset : ((Int,Int),Bool) -> Game -> Game
+reset (click,replay) g = if replay then initGame else Update.stepGame click g
 
 
 main : Signal.Signal Element
 main =
-  Signal.map display test
+  Signal.map display gui

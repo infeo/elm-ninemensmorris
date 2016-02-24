@@ -484,7 +484,7 @@ fastForward inp g =
               _ ->
                 fastForward inp g1
 
-        EndSt ->
+        End ->
           g
 
         _ ->
