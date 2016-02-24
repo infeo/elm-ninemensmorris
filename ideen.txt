@@ -11,9 +11,6 @@ Markiere alle Positionen der möglichen Züge farbig (z.b. nach Anklicke eines S
 
 Baue KI (setzte zufällig Steine, versuche gegnerische Mühle zu verhindern & vervollständige eigene Mühle)
 
-Baue einen "Erneut spielen"-Knopf ein
-
-
 Subsysteme:
 Spiel brett 1.Tier
 Modell, Regeln, Zustände 2.Tier

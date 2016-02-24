@@ -32,7 +32,7 @@ initGame =
   , pl2 = black
   , plx = noOne
   , machine = millMachine
-  , status = OnGoing
+  , status = Init
   , view = Board.realView
   , fstNod = Nothing
   }
@@ -82,12 +82,6 @@ type FakePlayer
 --the StateMachine and init of it
 --Create the States
 
-
-initState : State
-initState =
-  makeState "init"
-
-
 pseudoMoveState : State
 pseudoMoveState =
   makeState "pseudoMove"
@@ -135,8 +129,7 @@ endState =
 millMachine : StateMachine Player
 millMachine =
   { states =
-      [ initState
-      , pseudoMoveState
+      [ pseudoMoveState
       , putState
       , slideState
       , jumpState
@@ -146,8 +139,7 @@ millMachine =
       , endState
       ]
   , transitions =
-      [ ( initState, pseudoMoveState )
-      , ( pseudoMoveState, putState )
+      [ ( pseudoMoveState, putState )
       , ( pseudoMoveState, slideState )
       , ( pseudoMoveState, jumpState )
       , ( putState, pseudoTakeState )
@@ -176,7 +168,8 @@ millMachine =
 
 
 type Status
-  = OnGoing
+  = Init
+  | OnGoing
   | Win
   | Draw
 
@@ -226,22 +219,19 @@ wrapper' x =
 
 
 type FakeState
-  = Init
-  | PseudoMove
+  = PseudoMove
   | Put
   | Slide
   | Jump
   | PseudoTake
   | HasMill
   | Check
-  | EndSt
+  | End
 
 
 hide : State -> FakeState
 hide st =
-  if st == initState then
-    Init
-  else if st == pseudoMoveState then
+  if st == pseudoMoveState then
     PseudoMove
   else if st == putState then
     Put
@@ -256,4 +246,4 @@ hide st =
   else if st == checkState then
     Check
   else
-    EndSt
+    End
