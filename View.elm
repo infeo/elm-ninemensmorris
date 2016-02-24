@@ -2,13 +2,14 @@ module View (..) where
 
 import Graphics.Collage exposing (..)
 import Graphics.Element exposing (..)
+import Graphics.Input exposing (..)
 import Color
 import Array
 import List
 import Model exposing (..)
 import Update
 import Maybe
-
+import Inputs
 
 display : Game -> Element
 display g =
@@ -92,7 +93,9 @@ displayDraw =
     <| collage
         500
         500
-        [ toForm (show "Draw!") ]
+        [ toForm (show "Draw!")  |> move (0,20)
+        , replayBut |> move (0,-20)
+        ]
 
 
 showPlayer : Player -> Form
@@ -112,7 +115,24 @@ showPlayer pl =
       , ma pl.mills |> move ( 0, 70 )
       ]
 
+--Replay Button not working properly
+-- mailbox must be set back
+
+replayBut : Form
+replayBut = toForm <| button (Signal.message (replayBox.address) True)   "Replay"
+
+replayBox : Signal.Mailbox Bool
+replayBox = Signal.mailbox False
+
+
+
+test : Signal.Signal Game
+test = Signal.foldp function initGame (Signal.map2 (,) Inputs.input replayBox.signal)
+
+function : ((Int,Int),Bool) -> Game -> Game
+function (click,replay) g = if replay then initGame else Update.stepGame click g
+
 
 main : Signal.Signal Element
 main =
-  Signal.map display Update.gameState
+  Signal.map display test

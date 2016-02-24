@@ -1,10 +1,8 @@
 module Update (..) where
 
 import Model exposing (..)
-import Inputs exposing (..)
 import Graph exposing (..)
 import Dict
-import Signal
 import List
 import Maybe exposing (..)
 import Debug exposing (crash)
@@ -507,7 +505,7 @@ withinRange ( x, y ) delta ( a, b ) =
     Nothing
 
 
-stepGame : Input -> Game -> Game
+stepGame : (Int,Int) -> Game -> Game
 stepGame input g =
   let
     ls =
@@ -579,11 +577,6 @@ stepGame input g =
 
 
 --ugly
-
-
-gameState : Signal.Signal Game
-gameState =
-  Signal.foldp stepGame initGame input
 
 
 allUNeed : Game -> ( FakeState, Player, Player )
