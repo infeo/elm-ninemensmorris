@@ -11,6 +11,7 @@ import Update
 import Maybe
 import Inputs
 
+
 display : Game -> Element
 display g =
   case g.status of
@@ -22,9 +23,10 @@ display g =
 
     Win ->
       displayWin g
-      
+
     _ ->
       displayInit
+
 
 displayOngoing : Game -> Element
 displayOngoing g =
@@ -43,13 +45,22 @@ displayOngoing g =
         pl1
       else
         pl2
-    
-    myLineStyle =let tmp = solid Color.red
-                 in {tmp | width = 5.0}
-    markedStone = case g.fstNod `Maybe.andThen` (\id -> Array.get id view.nodeToCoord) of
-                    Just (x,y) -> move ( toFloat x, toFloat (-y) ) <| outlined (myLineStyle) <| circle 10 
-                    Nothing -> filled (Color.hsla (degrees 0) 1 0.5 0)  <| circle 10
-    
+
+    myLineStyle =
+      let
+        tmp =
+          solid Color.red
+      in
+        { tmp | width = 5.0 }
+
+    markedStone =
+      case g.fstNod `Maybe.andThen` (\id -> Array.get id view.nodeToCoord) of
+        Just ( x, y ) ->
+          move ( toFloat x, toFloat (-y) ) <| outlined (myLineStyle) <| circle 10
+
+        Nothing ->
+          filled (Color.hsla (degrees 0) 1 0.5 0) <| circle 10
+
     whiteStones =
       List.filterMap (\x -> Array.get x view.nodeToCoord) pl1.myFields
 
@@ -66,11 +77,12 @@ displayOngoing g =
           [ view.concreteRep
           , showPlayer pl1 |> move ( -100, 175 )
           , showPlayer pl2 |> move ( 100, 175 )
-          --, toForm (show g.status)
+            --, toForm (show g.status)
           , markedStone
           , showStones Color.white whiteStones
           , showStones Color.black blackStones
           ]
+
 
 displayDraw : Element
 displayDraw =
@@ -78,25 +90,30 @@ displayDraw =
     <| collage
         500
         500
-        [ toForm (show "Draw!")  |> move (0,20)
-        , replayBut |> move (0,-20)
+        [ toForm (show "Draw!") |> move ( 0, 20 )
+        , replayBut |> move ( 0, -20 )
         ]
-        
-        
+
+
 displayWin : Game -> Element
 displayWin g =
   let
-    winner = case wrapper' g.pl1 of
-                End -> "Player 2 wins"
-                _ -> "Player 1 wins"
+    winner =
+      case wrapper' g.pl1 of
+        End ->
+          "Player 2 wins"
+
+        _ ->
+          "Player 1 wins"
   in
     container 600 600 middle
       <| collage
           500
           500
-          [ toForm (show winner) |> move (0,20)
-          , replayBut |> move (0,-20)
+          [ toForm (show winner) |> move ( 0, 20 )
+          , replayBut |> move ( 0, -20 )
           ]
+
 
 displayInit : Element
 displayInit =
@@ -104,7 +121,8 @@ displayInit =
     <| collage
         500
         500
-        [startBut]
+        [ startBut ]
+
 
 showPlayer : Player -> Form
 showPlayer pl =
@@ -125,20 +143,31 @@ showPlayer pl =
 
 
 startBut : Form
-startBut = toForm <| button (Signal.message (buttonBox.address) False) "Start"
+startBut =
+  toForm <| button (Signal.message (buttonBox.address) False) "Start"
+
 
 replayBut : Form
-replayBut = toForm <| button (Signal.message (buttonBox.address) True) "Replay?"
+replayBut =
+  toForm <| button (Signal.message (buttonBox.address) True) "Replay?"
+
 
 buttonBox : Signal.Mailbox Bool
-buttonBox = Signal.mailbox True
+buttonBox =
+  Signal.mailbox True
 
 
 gui : Signal.Signal Game
-gui = Signal.foldp reset initGame (Signal.map2 (,) Inputs.input buttonBox.signal)
+gui =
+  Signal.foldp reset initGame (Signal.map2 (,) Inputs.input buttonBox.signal)
 
-reset : ((Int,Int),Bool) -> Game -> Game
-reset (click,replay) g = if replay then initGame else Update.stepGame click g
+
+reset : ( ( Int, Int ), Bool ) -> Game -> Game
+reset ( click, replay ) g =
+  if replay then
+    initGame
+  else
+    Update.stepGame click g
 
 
 main : Signal.Signal Element

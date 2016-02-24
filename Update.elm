@@ -505,7 +505,7 @@ withinRange ( x, y ) delta ( a, b ) =
     Nothing
 
 
-stepGame : (Int,Int) -> Game -> Game
+stepGame : ( Int, Int ) -> Game -> Game
 stepGame input g =
   let
     ls =
