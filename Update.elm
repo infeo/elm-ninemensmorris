@@ -19,11 +19,6 @@ magic =
   (initGame.view).abstractRep
 
 
-dragon =
-  (initGame.plx).myFields
-
-
-
 --proofs, if a stone is in Mill or not
 
 
@@ -90,7 +85,7 @@ validTurns g fstNod sndNod =
         Slide ->
           let
             x =
-              Graph.get fstNod magic
+              Graph.get fstNod (g.view).abstractRep 
           in
             case x of
               Just ctx ->
@@ -147,7 +142,7 @@ validTurns g fstNod sndNod =
 
 fromIdToNeighbours : NodeId -> List NodeId
 fromIdToNeighbours id =
-  case (get id magic) of
+  case (get id magic) of --HERE
     Just ctx ->
       alongOutgoingEdges ctx
 
@@ -403,7 +398,7 @@ stepPlayerS oldId newId g =
             { opp | canMove = not (List.isEmpty <| checkMovement opp dummy) }
 
           newOpp =
-            trans tmp_opp wizard
+            trans tmp_opp (g.machine)
         in
           ( { curr
               | playing = False

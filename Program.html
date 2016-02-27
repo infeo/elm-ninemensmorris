@@ -9367,6 +9367,12 @@ Elm.Model.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $Statey = Elm.Statey.make(_elm);
    var _op = {};
+   var Nine = {ctor: "Nine"};
+   var Seven = {ctor: "Seven"};
+   var Six = {ctor: "Six"};
+   var Five = {ctor: "Five"};
+   var Three = {ctor: "Three"};
+   var Round = {ctor: "Round"};
    var End = {ctor: "End"};
    var Check = {ctor: "Check"};
    var HasMill = {ctor: "HasMill"};
@@ -9484,7 +9490,13 @@ Elm.Model.make = function (_elm) {
                               ,HasMill: HasMill
                               ,Check: Check
                               ,End: End
-                              ,hide: hide};
+                              ,hide: hide
+                              ,Round: Round
+                              ,Three: Three
+                              ,Five: Five
+                              ,Six: Six
+                              ,Seven: Seven
+                              ,Nine: Nine};
 };Elm.Update = Elm.Update || {};
 Elm.Update.make = function (_elm) {
    "use strict";
@@ -9520,8 +9532,6 @@ Elm.Update.make = function (_elm) {
    var fromContextToIdLabel = function (ctx) {    var nod = ctx.node;return {ctor: "_Tuple2",_0: nod.id,_1: nod.label};};
    var fromTupToList = function (_p9) {    var _p10 = _p9;return _U.list([_p10._0,_p10._1,_p10._2]);};
    var isInMill = F2(function (pl,nodeId) {    var ls = A2($List.concatMap,fromTupToList,pl.mills);return A2($List.member,nodeId,ls);});
-   var dragon = $Model.initGame.plx.myFields;
-   var magic = $Model.initGame.view.abstractRep;
    var validTurns = F3(function (g,fstNod,sndNod) {
       var dummy = g.plx;
       var freeNodes = dummy.myFields;
@@ -9532,7 +9542,7 @@ Elm.Update.make = function (_elm) {
       var sndOk = function () {
          var _p12 = st;
          switch (_p12.ctor)
-         {case "Slide": var x = A2($Graph.get,fstNod,magic);
+         {case "Slide": var x = A2($Graph.get,fstNod,g.view.abstractRep);
               var _p13 = x;
               if (_p13.ctor === "Just") {
                     return A2($List.any,
@@ -9570,6 +9580,7 @@ Elm.Update.make = function (_elm) {
       }();
       return relOk && (fstOk && sndOk);
    });
+   var magic = $Model.initGame.view.abstractRep;
    var fromIdToNeighbours = function (id) {
       var _p16 = A2($Graph.get,id,magic);
       if (_p16.ctor === "Just") {
@@ -9596,7 +9607,7 @@ Elm.Update.make = function (_elm) {
             var nod = _p18._0.node;
             return {ctor: "_Tuple2",_0: nod.id,_1: nod.label};
          } else {
-            return _U.crashCase("Update",{start: {line: 270,column: 3},end: {line: 279,column: 52}},_p18)("IMPOSSIBLE: a nodeId is never deleted");
+            return _U.crashCase("Update",{start: {line: 265,column: 3},end: {line: 274,column: 52}},_p18)("IMPOSSIBLE: a nodeId is never deleted");
          }
    };
    var getNewMills = F2(function (pl,nod) {
@@ -9718,7 +9729,7 @@ Elm.Update.make = function (_elm) {
                                 ,_1: _U.update(opp,{myFields: A2($List.filter,function (x) {    return !_U.eq(x,newId);},opp.myFields),numOfStones: tmp - 1})
                                 ,_2: _U.update(dummy,{myFields: A2($List._op["::"],newId,dummy.myFields)})};
          case "Check": var tmp_opp = _U.update(opp,{canMove: $Basics.not($List.isEmpty(A2(checkMovement,opp,dummy)))});
-           var newOpp = A2($Model.trans,tmp_opp,wizard);
+           var newOpp = A2($Model.trans,tmp_opp,g.machine);
            return {ctor: "_Tuple3"
                   ,_0: _U.update(curr,{playing: false,canMove: $Basics.not($List.isEmpty(A2(checkMovement,curr,dummy)))})
                   ,_1: _U.update(newOpp,{playing: true})
@@ -9828,7 +9839,6 @@ Elm.Update.make = function (_elm) {
    return _elm.Update.values = {_op: _op
                                ,wizard: wizard
                                ,magic: magic
-                               ,dragon: dragon
                                ,isInMill: isInMill
                                ,fromTupToList: fromTupToList
                                ,checkMovement: checkMovement
@@ -9866,16 +9876,33 @@ Elm.View.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $Update = Elm.Update.make(_elm);
    var _op = {};
-   var reset = F2(function (_p0,g) {    var _p1 = _p0;return _p1._1 ? $Model.initGame : A2($Update.stepGame,_p1._0,g);});
+   var reset = F2(function (_p0,g) {
+      var _p1 = _p0;
+      var _p2 = _p1._2;
+      if (_p2.ctor === "Nothing") {
+            return $Model.initGame;
+         } else {
+            return _p1._1 ? $Model.initGame : A2($Update.stepGame,_p1._0,g);
+         }
+   });
+   var selectBox = $Signal.mailbox($Maybe.Nothing);
+   var selectBoardDropDown = A2($Graphics$Input.dropDown,
+   $Signal.message(selectBox.address),
+   _U.list([{ctor: "_Tuple2",_0: "NineMensMorris",_1: $Maybe.Just($Model.Nine)}
+           ,{ctor: "_Tuple2",_0: "RoundMensMorris",_1: $Maybe.Just($Model.Round)}
+           ,{ctor: "_Tuple2",_0: "ThreeMensMorris",_1: $Maybe.Just($Model.Three)}
+           ,{ctor: "_Tuple2",_0: "FiveMensMorris",_1: $Maybe.Just($Model.Five)}
+           ,{ctor: "_Tuple2",_0: "SixMensMorris",_1: $Maybe.Just($Model.Six)}
+           ,{ctor: "_Tuple2",_0: "SevenMensMorris",_1: $Maybe.Just($Model.Seven)}]));
    var buttonBox = $Signal.mailbox(true);
    var gui = A3($Signal.foldp,
    reset,
    $Model.initGame,
-   A3($Signal.map2,F2(function (v0,v1) {    return {ctor: "_Tuple2",_0: v0,_1: v1};}),$Inputs.input,buttonBox.signal));
+   A4($Signal.map3,F3(function (v0,v1,v2) {    return {ctor: "_Tuple3",_0: v0,_1: v1,_2: v2};}),$Inputs.input,buttonBox.signal,selectBox.signal));
    var replayBut = $Graphics$Collage.toForm(A2($Graphics$Input.button,A2($Signal.message,buttonBox.address,true),"Replay?"));
    var startBut = $Graphics$Collage.toForm(A2($Graphics$Input.button,A2($Signal.message,buttonBox.address,false),"Start"));
    var showPlayer = function (pl) {
-      var ma = function (_p2) {    return $Graphics$Collage.toForm($Graphics$Element.show(_p2));};
+      var ma = function (_p3) {    return $Graphics$Collage.toForm($Graphics$Element.show(_p3));};
       return $Graphics$Collage.group(_U.list([ma(pl.name)
                                              ,A2($Graphics$Collage.move,{ctor: "_Tuple2",_0: 0,_1: 10},ma(pl.playing))
                                              ,A2($Graphics$Collage.move,{ctor: "_Tuple2",_0: 0,_1: 20},ma(pl.numOfStones))
@@ -9885,11 +9912,19 @@ Elm.View.make = function (_elm) {
                                              ,A2($Graphics$Collage.move,{ctor: "_Tuple2",_0: 0,_1: 60},ma(pl.state))
                                              ,A2($Graphics$Collage.move,{ctor: "_Tuple2",_0: 0,_1: 70},ma(pl.mills))]));
    };
-   var displayInit = A4($Graphics$Element.container,600,600,$Graphics$Element.middle,A3($Graphics$Collage.collage,500,500,_U.list([startBut])));
+   var displayInit = A4($Graphics$Element.container,
+   600,
+   600,
+   $Graphics$Element.middle,
+   A3($Graphics$Collage.collage,
+   500,
+   500,
+   _U.list([A2($Graphics$Collage.move,{ctor: "_Tuple2",_0: 0,_1: 20},startBut)
+           ,A2($Graphics$Collage.move,{ctor: "_Tuple2",_0: 0,_1: -20},$Graphics$Collage.toForm(selectBoardDropDown))])));
    var displayWin = function (g) {
       var winner = function () {
-         var _p3 = $Model.wrapper$(g.pl1);
-         if (_p3.ctor === "End") {
+         var _p4 = $Model.wrapper$(g.pl1);
+         if (_p4.ctor === "End") {
                return "Player 2 wins";
             } else {
                return "Player 1 wins";
@@ -9917,10 +9952,10 @@ Elm.View.make = function (_elm) {
    var displayOngoing = function (g) {
       var showStones = F2(function (color,ls) {
          return $Graphics$Collage.group(A2($List.map,
-         function (_p4) {
-            var _p5 = _p4;
+         function (_p5) {
+            var _p6 = _p5;
             return A2($Graphics$Collage.move,
-            {ctor: "_Tuple2",_0: $Basics.toFloat(_p5._0),_1: $Basics.toFloat(0 - _p5._1)},
+            {ctor: "_Tuple2",_0: $Basics.toFloat(_p6._0),_1: $Basics.toFloat(0 - _p6._1)},
             A2($Graphics$Collage.filled,color,$Graphics$Collage.circle(10)));
          },
          ls));
@@ -9928,10 +9963,10 @@ Elm.View.make = function (_elm) {
       var myLineStyle = function () {    var tmp = $Graphics$Collage.solid($Color.red);return _U.update(tmp,{width: 5.0});}();
       var view = g.view;
       var markedStone = function () {
-         var _p6 = A2($Maybe.andThen,g.fstNod,function (id) {    return A2($Array.get,id,view.nodeToCoord);});
-         if (_p6.ctor === "Just") {
+         var _p7 = A2($Maybe.andThen,g.fstNod,function (id) {    return A2($Array.get,id,view.nodeToCoord);});
+         if (_p7.ctor === "Just") {
                return A2($Graphics$Collage.move,
-               {ctor: "_Tuple2",_0: $Basics.toFloat(_p6._0._0),_1: $Basics.toFloat(0 - _p6._0._1)},
+               {ctor: "_Tuple2",_0: $Basics.toFloat(_p7._0._0),_1: $Basics.toFloat(0 - _p7._0._1)},
                A2($Graphics$Collage.outlined,myLineStyle,$Graphics$Collage.circle(10)));
             } else {
                return A2($Graphics$Collage.filled,A4($Color.hsla,$Basics.degrees(0),1,0.5,0),$Graphics$Collage.circle(10));
@@ -9957,8 +9992,8 @@ Elm.View.make = function (_elm) {
               ,A2(showStones,$Color.black,blackStones)])));
    };
    var display = function (g) {
-      var _p7 = g.status;
-      switch (_p7.ctor)
+      var _p8 = g.status;
+      switch (_p8.ctor)
       {case "OnGoing": return displayOngoing(g);
          case "Draw": return displayDraw;
          case "Win": return displayWin(g);
@@ -9975,6 +10010,8 @@ Elm.View.make = function (_elm) {
                              ,startBut: startBut
                              ,replayBut: replayBut
                              ,buttonBox: buttonBox
+                             ,selectBox: selectBox
+                             ,selectBoardDropDown: selectBoardDropDown
                              ,gui: gui
                              ,reset: reset
                              ,main: main};

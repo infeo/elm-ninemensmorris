@@ -7,6 +7,8 @@ Gestalte Startseite, bevor gespielt wird
 -> verschiedene Mühle-Varianten implementieren
 -> denke eigene Mühle Varainte aus
 
+initGame als Funktion, sodass das dropDown-Menü benutzt werden kann
+
 Markiere alle Positionen der möglichen Züge farbig (z.b. nach Anklicke eines Steines)
 
 Baue KI (setzte zufällig Steine, versuche gegnerische Mühle zu verhindern & vervollständige eigene Mühle)
@@ -19,3 +21,8 @@ Ausgabe 4.Tier
 
 Nochmals mittels Kohärenz und Kopplung überdenken
 Facade dann mittels der Sichtbarmachung von Funktionen & Typen hinter Modulnamen implementieren
+
+
+initGame als Funktion umschreiben
+
+kI-funktion einbauen
