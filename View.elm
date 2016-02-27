@@ -164,7 +164,8 @@ selectBox = Signal.mailbox Nothing
 selectBoardDropDown : Element
 selectBoardDropDown =
     dropDown (Signal.message selectBox.address)
-        [ ("NineMensMorris", Just Nine)
+        [ ("", Nothing)
+        , ("NineMensMorris", Just Nine)
         , ("RoundMensMorris", Just Model.Round)
         , ("ThreeMensMorris", Just Three)
         , ("FiveMensMorris", Just Five)

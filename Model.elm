@@ -10,7 +10,7 @@ import Maybe
 type alias Mill =
   ( NodeId, NodeId, NodeId )
 
-
+type alias BoardGraph = Graph (Int,Int,Int) String
 
 --the Game & init of it
 

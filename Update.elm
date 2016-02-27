@@ -8,17 +8,6 @@ import Maybe exposing (..)
 import Debug exposing (crash)
 
 
---for easy use
-
-
-wizard =
-  initGame.machine
-
-
-magic =
-  (initGame.view).abstractRep
-
-
 --proofs, if a stone is in Mill or not
 
 
@@ -36,8 +25,8 @@ fromTupToList ( one, two, three ) =
   [ one, two, three ]
 
 
-checkMovement : Player -> Player -> List NodeId
-checkMovement pl dummy =
+checkMovement : Player -> Player -> BoardGraph -> List NodeId
+checkMovement pl dummy gra=
   let
     freeNodes =
       dummy.myFields
@@ -49,7 +38,7 @@ checkMovement pl dummy =
       _ ->
         let
           ls =
-            List.concatMap fromIdToNeighbours pl.myFields
+            List.concatMap (\x -> fromIdToNeighbours x gra)  pl.myFields
 
           --alle erreichbaren Knoten, wenn der Spieler nur schieben kann
           ls2 =
@@ -140,9 +129,9 @@ validTurns g fstNod sndNod =
     relOk && fstOk && sndOk
 
 
-fromIdToNeighbours : NodeId -> List NodeId
-fromIdToNeighbours id =
-  case (get id magic) of --HERE
+fromIdToNeighbours : NodeId -> BoardGraph -> List NodeId
+fromIdToNeighbours id gra=
+  case (get id gra) of 
     Just ctx ->
       alongOutgoingEdges ctx
 
@@ -152,7 +141,6 @@ fromIdToNeighbours id =
 
 
 {-
-        Only works with magic
       Kombis für jede Komponente: (0,2) (0,1) (1,2)
       Je nach Bedarf muss vorne hinten oder in der Mitte eingefügt werden
       Dann überprüft man, ob die Elemente in der Liste sind.
@@ -162,8 +150,8 @@ fromIdToNeighbours id =
 -}
 
 
-getNewMills : Player -> NodeId -> List Mill
-getNewMills pl nod =
+getNewMills : Player -> NodeId -> BoardGraph -> List Mill
+getNewMills pl nod graph=
   let
     max =
       \ns num val ->
@@ -173,11 +161,11 @@ getNewMills pl nod =
           val
 
     tupLs =
-      List.filter (\x -> List.member (fst x) pl.myFields) (List.map fromContextToIdLabel (fst (guidedBfs alongOutgoingEdges max [ nod ] [] magic)))
+      List.filter (\x -> List.member (fst x) pl.myFields) (List.map  fromContextToIdLabel  <| fst  (guidedBfs alongOutgoingEdges max [ nod ] [] graph)) 
 
     --Liste von (NodId, Labels)
     ( a, b, c ) =
-      snd (fromIdToIdLabel nod)
+      snd (fromIdToIdLabel graph nod)
 
     --Koordinaten des Punktes als Label
     select =
@@ -260,9 +248,9 @@ fromContextToIdLabel ctx =
     ( nod.id, nod.label )
 
 
-fromIdToIdLabel : NodeId -> ( NodeId, ( Int, Int, Int ) )
-fromIdToIdLabel x =
-  case (get x magic) of
+fromIdToIdLabel : BoardGraph -> NodeId -> ( NodeId, ( Int, Int, Int ) )
+fromIdToIdLabel graph x =
+  case (get x graph) of
     Just ctx ->
       let
         nod =
@@ -274,36 +262,35 @@ fromIdToIdLabel x =
       crash "IMPOSSIBLE: a nodeId is never deleted"
 
 
-updateMills : Player -> NodeId -> NodeId -> ( Bool, List Mill )
-updateMills pl oldId newId =
+updateMills : Player -> NodeId -> NodeId -> BoardGraph -> ( Bool, List Mill )
+updateMills pl oldId newId graph=
   let
     ls =
       List.filter (\( a, b, c ) -> a /= oldId && b /= oldId && c /= oldId) pl.mills
 
     ls2 =
-      getNewMills pl newId
+      getNewMills pl newId graph
   in
     ( not (List.isEmpty ls2), List.concat (ls2 :: [ ls ]) )
 
 
-stepPlayer : Player -> NodeId -> NodeId -> Player
-stepPlayer pl oldId newId =
+stepPlayer : Game -> NodeId -> NodeId -> Player
+stepPlayer g oldId newId =
   let
-    st =
-      wrapper' pl
-
+    (st, curr, opp) = allUNeed g
+    graph = g.view.abstractRep
     newPl =
       case st of
         Put ->
           let
             tmp =
-              { pl
-                | numOfStonesInGame = pl.numOfStonesInGame + 1
-                , myFields = newId :: pl.myFields
+              { curr
+                | numOfStonesInGame = curr.numOfStonesInGame + 1
+                , myFields = newId :: curr.myFields
               }
 
             ( a, b ) =
-              updateMills tmp oldId newId
+              updateMills tmp oldId newId graph
           in
             { tmp
               | mills = b
@@ -313,12 +300,12 @@ stepPlayer pl oldId newId =
         Slide ->
           let
             tmp =
-              { pl
-                | myFields = newId :: (List.filter (\x -> x /= oldId) pl.myFields)
+              { curr
+                | myFields = newId :: (List.filter (\x -> x /= oldId) curr.myFields)
               }
 
             ( a, b ) =
-              updateMills tmp oldId newId
+              updateMills tmp oldId newId graph
           in
             { tmp
               | mills = b
@@ -328,12 +315,12 @@ stepPlayer pl oldId newId =
         Jump ->
           let
             tmp =
-              { pl
-                | myFields = newId :: (List.filter (\x -> x /= oldId) pl.myFields)
+              { curr
+                | myFields = newId :: (List.filter (\x -> x /= oldId) curr.myFields)
               }
 
             ( a, b ) =
-              updateMills tmp oldId newId
+              updateMills tmp oldId newId graph
           in
             { tmp
               | mills = b
@@ -341,12 +328,12 @@ stepPlayer pl oldId newId =
             }
 
         HasMill ->
-          { pl | closedMill = False }
+          { curr | closedMill = False }
 
         _ ->
-          pl
+          curr
   in
-    trans newPl wizard
+    trans newPl g.machine
 
 
 
@@ -364,11 +351,13 @@ stepPlayerS oldId newId g =
     ( st, curr, opp ) =
       allUNeed g
 
+    graph = g.view.abstractRep
+    
     dummy =
       g.plx
 
     newCurr =
-      stepPlayer curr oldId newId
+      stepPlayer g oldId newId 
 
     tmp =
       opp.numOfStones
@@ -395,14 +384,14 @@ stepPlayerS oldId newId g =
       Check ->
         let
           tmp_opp =
-            { opp | canMove = not (List.isEmpty <| checkMovement opp dummy) }
+            { opp | canMove = not (List.isEmpty (checkMovement opp dummy graph)) }
 
           newOpp =
             trans tmp_opp (g.machine)
         in
           ( { curr
               | playing = False
-              , canMove = not (List.isEmpty <| checkMovement curr dummy)
+              , canMove = not (List.isEmpty <| checkMovement curr dummy graph)
             }
           , { newOpp | playing = True }
           , dummy

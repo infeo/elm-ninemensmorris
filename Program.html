@@ -9529,132 +9529,61 @@ Elm.Update.make = function (_elm) {
       return _U.cmp(_p7,_p5 + delta) < 1 && _U.cmp(_p7,_p5 - delta) > -1 && (_U.cmp(_p8,_p6 + delta) < 1 && _U.cmp(_p8,
       _p6 - delta) > -1) ? $Maybe.Just({ctor: "_Tuple2",_0: _p5,_1: _p6}) : $Maybe.Nothing;
    });
-   var fromContextToIdLabel = function (ctx) {    var nod = ctx.node;return {ctor: "_Tuple2",_0: nod.id,_1: nod.label};};
-   var fromTupToList = function (_p9) {    var _p10 = _p9;return _U.list([_p10._0,_p10._1,_p10._2]);};
-   var isInMill = F2(function (pl,nodeId) {    var ls = A2($List.concatMap,fromTupToList,pl.mills);return A2($List.member,nodeId,ls);});
-   var validTurns = F3(function (g,fstNod,sndNod) {
-      var dummy = g.plx;
-      var freeNodes = dummy.myFields;
-      var _p11 = allUNeed(g);
-      var st = _p11._0;
-      var curr = _p11._1;
-      var opp = _p11._2;
-      var sndOk = function () {
-         var _p12 = st;
-         switch (_p12.ctor)
-         {case "Slide": var x = A2($Graph.get,fstNod,g.view.abstractRep);
-              var _p13 = x;
-              if (_p13.ctor === "Just") {
-                    return A2($List.any,
-                    function (x) {
-                       return _U.eq(x,sndNod);
-                    },
-                    A2($List.filter,function (x) {    return A2($List.member,x,freeNodes);},$Graph.alongOutgoingEdges(_p13._0)));
-                 } else {
-                    return false;
-                 }
-            case "Jump": return A2($List.member,sndNod,freeNodes);
-            default: return true;}
-      }();
-      var fstOk = function () {
-         var _p14 = st;
-         switch (_p14.ctor)
-         {case "Put": return A2($List.member,fstNod,freeNodes);
-            case "HasMill": return _U.eq($List.length(opp.myFields),$List.length(A2($List.concatMap,fromTupToList,opp.mills))) ? A2($List.any,
-              function (x) {
-                 return _U.eq(x,fstNod);
-              },
-              opp.myFields) : A2($List.any,function (x) {    return _U.eq(x,fstNod);},opp.myFields) && $Basics.not(A2(isInMill,opp,fstNod));
-            case "Slide": return A2($List.member,fstNod,curr.myFields);
-            case "Jump": return A2($List.member,fstNod,curr.myFields);
-            default: return true;}
-      }();
-      var relOk = function () {
-         var _p15 = st;
-         switch (_p15.ctor)
-         {case "Slide": return !_U.eq(fstNod,sndNod);
-            case "Jump": return !_U.eq(fstNod,sndNod);
-            case "HasMill": return _U.eq(fstNod,sndNod);
-            case "Put": return _U.eq(fstNod,sndNod);
-            default: return true;}
-      }();
-      return relOk && (fstOk && sndOk);
-   });
-   var magic = $Model.initGame.view.abstractRep;
-   var fromIdToNeighbours = function (id) {
-      var _p16 = A2($Graph.get,id,magic);
-      if (_p16.ctor === "Just") {
-            return $Graph.alongOutgoingEdges(_p16._0);
-         } else {
-            return _U.list([]);
-         }
-   };
-   var checkMovement = F2(function (pl,dummy) {
-      var freeNodes = dummy.myFields;
-      var _p17 = pl.numOfStones;
-      if (_p17 === 3) {
-            return freeNodes;
-         } else {
-            var ls = A2($List.concatMap,fromIdToNeighbours,pl.myFields);
-            var ls2 = A2($List.filter,function (x) {    return $Basics.not(A2($List.member,x,pl.myFields));},ls);
-            var ls3 = A2($List.filter,function (x) {    return A2($List.member,x,freeNodes);},ls2);
-            return ls3;
-         }
-   });
-   var fromIdToIdLabel = function (x) {
-      var _p18 = A2($Graph.get,x,magic);
-      if (_p18.ctor === "Just") {
-            var nod = _p18._0.node;
+   var fromIdToIdLabel = F2(function (graph,x) {
+      var _p9 = A2($Graph.get,x,graph);
+      if (_p9.ctor === "Just") {
+            var nod = _p9._0.node;
             return {ctor: "_Tuple2",_0: nod.id,_1: nod.label};
          } else {
-            return _U.crashCase("Update",{start: {line: 265,column: 3},end: {line: 274,column: 52}},_p18)("IMPOSSIBLE: a nodeId is never deleted");
+            return _U.crashCase("Update",{start: {line: 253,column: 3},end: {line: 262,column: 52}},_p9)("IMPOSSIBLE: a nodeId is never deleted");
          }
-   };
-   var getNewMills = F2(function (pl,nod) {
+   });
+   var fromContextToIdLabel = function (ctx) {    var nod = ctx.node;return {ctor: "_Tuple2",_0: nod.id,_1: nod.label};};
+   var getNewMills = F3(function (pl,nod,graph) {
       var toTuple = function (ls) {
-         var _p20 = ls;
-         if (_p20.ctor === "::" && _p20._1.ctor === "::" && _p20._1._1.ctor === "::" && _p20._1._1._1.ctor === "[]") {
-               return $Maybe.Just({ctor: "_Tuple3",_0: _p20._0,_1: _p20._1._0,_2: _p20._1._1._0});
+         var _p11 = ls;
+         if (_p11.ctor === "::" && _p11._1.ctor === "::" && _p11._1._1.ctor === "::" && _p11._1._1._1.ctor === "[]") {
+               return $Maybe.Just({ctor: "_Tuple3",_0: _p11._0,_1: _p11._1._0,_2: _p11._1._1._0});
             } else {
                return $Maybe.Nothing;
             }
       };
       var member$ = F2(function (x,ls) {
          member$: while (true) {
-            var _p21 = ls;
-            if (_p21.ctor === "[]") {
+            var _p12 = ls;
+            if (_p12.ctor === "[]") {
                   return $Maybe.Nothing;
                } else {
-                  if (_U.eq(x,_p21._0._1)) return $Maybe.Just(_p21._0._0); else {
-                        var _v12 = x,_v13 = _p21._1;
-                        x = _v12;
-                        ls = _v13;
+                  if (_U.eq(x,_p12._0._1)) return $Maybe.Just(_p12._0._0); else {
+                        var _v5 = x,_v6 = _p12._1;
+                        x = _v5;
+                        ls = _v6;
                         continue member$;
                      }
                }
          }
       });
-      var put = F3(function (pos,_p22,x) {
-         var _p23 = _p22;
-         var _p26 = _p23._1;
-         var _p25 = _p23._0;
-         var _p24 = pos;
-         switch (_p24)
-         {case 0: return {ctor: "_Tuple3",_0: x,_1: _p25,_2: _p26};
-            case 1: return {ctor: "_Tuple3",_0: _p25,_1: x,_2: _p26};
-            default: return {ctor: "_Tuple3",_0: _p25,_1: _p26,_2: x};}
+      var put = F3(function (pos,_p13,x) {
+         var _p14 = _p13;
+         var _p17 = _p14._1;
+         var _p16 = _p14._0;
+         var _p15 = pos;
+         switch (_p15)
+         {case 0: return {ctor: "_Tuple3",_0: x,_1: _p16,_2: _p17};
+            case 1: return {ctor: "_Tuple3",_0: _p16,_1: x,_2: _p17};
+            default: return {ctor: "_Tuple3",_0: _p16,_1: _p17,_2: x};}
       });
-      var select = function (x) {    var _p27 = x;switch (_p27) {case 0: return _U.list([1,2]);case 1: return _U.list([0,2]);default: return _U.list([0,1]);}};
-      var _p28 = $Basics.snd(fromIdToIdLabel(nod));
-      var a = _p28._0;
-      var b = _p28._1;
-      var c = _p28._2;
+      var select = function (x) {    var _p18 = x;switch (_p18) {case 0: return _U.list([1,2]);case 1: return _U.list([0,2]);default: return _U.list([0,1]);}};
+      var _p19 = $Basics.snd(A2(fromIdToIdLabel,graph,nod));
+      var a = _p19._0;
+      var b = _p19._1;
+      var c = _p19._2;
       var max = F3(function (ns,num,val) {    return _U.cmp(num,3) < 0 ? A2($Basics._op["++"],ns,val) : val;});
       var tupLs = A2($List.filter,
       function (x) {
          return A2($List.member,$Basics.fst(x),pl.myFields);
       },
-      A2($List.map,fromContextToIdLabel,$Basics.fst(A5($Graph.guidedBfs,$Graph.alongOutgoingEdges,max,_U.list([nod]),_U.list([]),magic))));
+      A2($List.map,fromContextToIdLabel,$Basics.fst(A5($Graph.guidedBfs,$Graph.alongOutgoingEdges,max,_U.list([nod]),_U.list([]),graph))));
       var decide = F3(function (pos,tup,z) {
          var tupLs2 = A2($List.filterMap,function (x) {    return A2(member$,x,tupLs);},A2($List.map,A2(put,pos,tup),select(z)));
          return _U.eq($List.length(tupLs2),2) ? A2($List._op["::"],nod,tupLs2) : _U.list([]);
@@ -9664,52 +9593,78 @@ Elm.Update.make = function (_elm) {
       var cMill = A3(decide,2,{ctor: "_Tuple2",_0: a,_1: b},c);
       return A2($List.filterMap,toTuple,_U.list([aMill,bMill,cMill]));
    });
-   var updateMills = F3(function (pl,oldId,newId) {
-      var ls2 = A2(getNewMills,pl,newId);
+   var updateMills = F4(function (pl,oldId,newId,graph) {
+      var ls2 = A3(getNewMills,pl,newId,graph);
       var ls = A2($List.filter,
-      function (_p29) {
-         var _p30 = _p29;
-         return !_U.eq(_p30._0,oldId) && (!_U.eq(_p30._1,oldId) && !_U.eq(_p30._2,oldId));
+      function (_p20) {
+         var _p21 = _p20;
+         return !_U.eq(_p21._0,oldId) && (!_U.eq(_p21._1,oldId) && !_U.eq(_p21._2,oldId));
       },
       pl.mills);
       return {ctor: "_Tuple2",_0: $Basics.not($List.isEmpty(ls2)),_1: $List.concat(A2($List._op["::"],ls2,_U.list([ls])))};
    });
-   var wizard = $Model.initGame.machine;
-   var stepPlayer = F3(function (pl,oldId,newId) {
-      var st = $Model.wrapper$(pl);
+   var stepPlayer = F3(function (g,oldId,newId) {
+      var graph = g.view.abstractRep;
+      var _p22 = allUNeed(g);
+      var st = _p22._0;
+      var curr = _p22._1;
+      var opp = _p22._2;
       var newPl = function () {
-         var _p31 = st;
-         switch (_p31.ctor)
-         {case "Put": var tmp = _U.update(pl,{numOfStonesInGame: pl.numOfStonesInGame + 1,myFields: A2($List._op["::"],newId,pl.myFields)});
-              var _p32 = A3(updateMills,tmp,oldId,newId);
-              var a = _p32._0;
-              var b = _p32._1;
+         var _p23 = st;
+         switch (_p23.ctor)
+         {case "Put": var tmp = _U.update(curr,{numOfStonesInGame: curr.numOfStonesInGame + 1,myFields: A2($List._op["::"],newId,curr.myFields)});
+              var _p24 = A4(updateMills,tmp,oldId,newId,graph);
+              var a = _p24._0;
+              var b = _p24._1;
               return _U.update(tmp,{mills: b,closedMill: a});
-            case "Slide": var tmp = _U.update(pl,{myFields: A2($List._op["::"],newId,A2($List.filter,function (x) {    return !_U.eq(x,oldId);},pl.myFields))});
-              var _p33 = A3(updateMills,tmp,oldId,newId);
-              var a = _p33._0;
-              var b = _p33._1;
+            case "Slide": var tmp = _U.update(curr,
+              {myFields: A2($List._op["::"],newId,A2($List.filter,function (x) {    return !_U.eq(x,oldId);},curr.myFields))});
+              var _p25 = A4(updateMills,tmp,oldId,newId,graph);
+              var a = _p25._0;
+              var b = _p25._1;
               return _U.update(tmp,{mills: b,closedMill: a});
-            case "Jump": var tmp = _U.update(pl,{myFields: A2($List._op["::"],newId,A2($List.filter,function (x) {    return !_U.eq(x,oldId);},pl.myFields))});
-              var _p34 = A3(updateMills,tmp,oldId,newId);
-              var a = _p34._0;
-              var b = _p34._1;
+            case "Jump": var tmp = _U.update(curr,
+              {myFields: A2($List._op["::"],newId,A2($List.filter,function (x) {    return !_U.eq(x,oldId);},curr.myFields))});
+              var _p26 = A4(updateMills,tmp,oldId,newId,graph);
+              var a = _p26._0;
+              var b = _p26._1;
               return _U.update(tmp,{mills: b,closedMill: a});
-            case "HasMill": return _U.update(pl,{closedMill: false});
-            default: return pl;}
+            case "HasMill": return _U.update(curr,{closedMill: false});
+            default: return curr;}
       }();
-      return A2($Model.trans,newPl,wizard);
+      return A2($Model.trans,newPl,g.machine);
+   });
+   var fromIdToNeighbours = F2(function (id,gra) {
+      var _p27 = A2($Graph.get,id,gra);
+      if (_p27.ctor === "Just") {
+            return $Graph.alongOutgoingEdges(_p27._0);
+         } else {
+            return _U.list([]);
+         }
+   });
+   var checkMovement = F3(function (pl,dummy,gra) {
+      var freeNodes = dummy.myFields;
+      var _p28 = pl.numOfStones;
+      if (_p28 === 3) {
+            return freeNodes;
+         } else {
+            var ls = A2($List.concatMap,function (x) {    return A2(fromIdToNeighbours,x,gra);},pl.myFields);
+            var ls2 = A2($List.filter,function (x) {    return $Basics.not(A2($List.member,x,pl.myFields));},ls);
+            var ls3 = A2($List.filter,function (x) {    return A2($List.member,x,freeNodes);},ls2);
+            return ls3;
+         }
    });
    var stepPlayerS = F3(function (oldId,newId,g) {
+      var newCurr = A3(stepPlayer,g,oldId,newId);
       var dummy = g.plx;
-      var _p35 = allUNeed(g);
-      var st = _p35._0;
-      var curr = _p35._1;
-      var opp = _p35._2;
-      var newCurr = A3(stepPlayer,curr,oldId,newId);
+      var graph = g.view.abstractRep;
+      var _p29 = allUNeed(g);
+      var st = _p29._0;
+      var curr = _p29._1;
+      var opp = _p29._2;
       var tmp = opp.numOfStones;
-      var _p36 = st;
-      switch (_p36.ctor)
+      var _p30 = st;
+      switch (_p30.ctor)
       {case "Put": return {ctor: "_Tuple3"
                           ,_0: newCurr
                           ,_1: opp
@@ -9728,49 +9683,99 @@ Elm.Update.make = function (_elm) {
                                 ,_0: newCurr
                                 ,_1: _U.update(opp,{myFields: A2($List.filter,function (x) {    return !_U.eq(x,newId);},opp.myFields),numOfStones: tmp - 1})
                                 ,_2: _U.update(dummy,{myFields: A2($List._op["::"],newId,dummy.myFields)})};
-         case "Check": var tmp_opp = _U.update(opp,{canMove: $Basics.not($List.isEmpty(A2(checkMovement,opp,dummy)))});
+         case "Check": var tmp_opp = _U.update(opp,{canMove: $Basics.not($List.isEmpty(A3(checkMovement,opp,dummy,graph)))});
            var newOpp = A2($Model.trans,tmp_opp,g.machine);
            return {ctor: "_Tuple3"
-                  ,_0: _U.update(curr,{playing: false,canMove: $Basics.not($List.isEmpty(A2(checkMovement,curr,dummy)))})
+                  ,_0: _U.update(curr,{playing: false,canMove: $Basics.not($List.isEmpty(A3(checkMovement,curr,dummy,graph)))})
                   ,_1: _U.update(newOpp,{playing: true})
                   ,_2: dummy};
          default: return {ctor: "_Tuple3",_0: newCurr,_1: opp,_2: dummy};}
    });
-   var stepForward = F2(function (_p37,g) {
-      var _p38 = _p37;
-      var _p39 = A3(stepPlayerS,_p38._0,_p38._1,g);
-      var one = _p39._0;
-      var two = _p39._1;
-      var newPlx = _p39._2;
-      var _p40 = function () {
-         var _p41 = one.ty;
-         if (_p41.ctor === "White") {
+   var stepForward = F2(function (_p31,g) {
+      var _p32 = _p31;
+      var _p33 = A3(stepPlayerS,_p32._0,_p32._1,g);
+      var one = _p33._0;
+      var two = _p33._1;
+      var newPlx = _p33._2;
+      var _p34 = function () {
+         var _p35 = one.ty;
+         if (_p35.ctor === "White") {
                return {ctor: "_Tuple2",_0: one,_1: two};
             } else {
                return {ctor: "_Tuple2",_0: two,_1: one};
             }
       }();
-      var newPl1 = _p40._0;
-      var newPl2 = _p40._1;
+      var newPl1 = _p34._0;
+      var newPl2 = _p34._1;
       var newStatus = _U.eq(one.state,$Model.endState) || _U.eq(two.state,$Model.endState) ? $Model.Win : _U.eq(one.numOfStones,3) && _U.eq(two.numOfStones,
       3) ? $Model.Draw : $Model.OnGoing;
       return _U.update(g,{pl1: newPl1,pl2: newPl2,plx: newPlx,status: newStatus});
    });
+   var fromTupToList = function (_p36) {    var _p37 = _p36;return _U.list([_p37._0,_p37._1,_p37._2]);};
+   var isInMill = F2(function (pl,nodeId) {    var ls = A2($List.concatMap,fromTupToList,pl.mills);return A2($List.member,nodeId,ls);});
+   var validTurns = F3(function (g,fstNod,sndNod) {
+      var dummy = g.plx;
+      var freeNodes = dummy.myFields;
+      var _p38 = allUNeed(g);
+      var st = _p38._0;
+      var curr = _p38._1;
+      var opp = _p38._2;
+      var sndOk = function () {
+         var _p39 = st;
+         switch (_p39.ctor)
+         {case "Slide": var x = A2($Graph.get,fstNod,g.view.abstractRep);
+              var _p40 = x;
+              if (_p40.ctor === "Just") {
+                    return A2($List.any,
+                    function (x) {
+                       return _U.eq(x,sndNod);
+                    },
+                    A2($List.filter,function (x) {    return A2($List.member,x,freeNodes);},$Graph.alongOutgoingEdges(_p40._0)));
+                 } else {
+                    return false;
+                 }
+            case "Jump": return A2($List.member,sndNod,freeNodes);
+            default: return true;}
+      }();
+      var fstOk = function () {
+         var _p41 = st;
+         switch (_p41.ctor)
+         {case "Put": return A2($List.member,fstNod,freeNodes);
+            case "HasMill": return _U.eq($List.length(opp.myFields),$List.length(A2($List.concatMap,fromTupToList,opp.mills))) ? A2($List.any,
+              function (x) {
+                 return _U.eq(x,fstNod);
+              },
+              opp.myFields) : A2($List.any,function (x) {    return _U.eq(x,fstNod);},opp.myFields) && $Basics.not(A2(isInMill,opp,fstNod));
+            case "Slide": return A2($List.member,fstNod,curr.myFields);
+            case "Jump": return A2($List.member,fstNod,curr.myFields);
+            default: return true;}
+      }();
+      var relOk = function () {
+         var _p42 = st;
+         switch (_p42.ctor)
+         {case "Slide": return !_U.eq(fstNod,sndNod);
+            case "Jump": return !_U.eq(fstNod,sndNod);
+            case "HasMill": return _U.eq(fstNod,sndNod);
+            case "Put": return _U.eq(fstNod,sndNod);
+            default: return true;}
+      }();
+      return relOk && (fstOk && sndOk);
+   });
    var fastForward = F2(function (inp,g) {
       fastForward: while (true) {
          var valid = A3(validTurns,g,$Basics.fst(inp),$Basics.snd(inp));
-         var _p42 = allUNeed(g);
-         var st = _p42._0;
-         var curr = _p42._1;
-         var opp = _p42._2;
+         var _p43 = allUNeed(g);
+         var st = _p43._0;
+         var curr = _p43._1;
+         var opp = _p43._2;
          if (valid) {
-               var _p43 = st;
-               switch (_p43.ctor)
+               var _p44 = st;
+               switch (_p44.ctor)
                {case "PseudoMove": return A2(stepForward,inp,g);
                   case "PseudoTake": var g1 = A2(stepForward,inp,g);
                     var curr = g1.pl1.playing ? g1.pl1 : g1.pl2;
-                    var _p44 = $Model.wrapper$(curr);
-                    if (_p44.ctor === "HasMill") {
+                    var _p45 = $Model.wrapper$(curr);
+                    if (_p45.ctor === "HasMill") {
                           return g1;
                        } else {
                           var _v24 = inp,_v25 = g1;
@@ -9790,55 +9795,53 @@ Elm.Update.make = function (_elm) {
    var stepGame = F2(function (input,g) {
       var g$ = _U.update(g,{fstNod: $Maybe.Nothing});
       var fstNod = g.fstNod;
-      var _p45 = allUNeed(g);
-      var st = _p45._0;
-      var curr = _p45._1;
-      var opp = _p45._2;
+      var _p46 = allUNeed(g);
+      var st = _p46._0;
+      var curr = _p46._1;
+      var opp = _p46._2;
       var ls = g.view.coords;
       var mybNod = A2($Maybe.andThen,$List.head(A2($List.filterMap,A2(withinRange,input,10),ls)),function (x) {    return A2($Dict.get,x,g.view.coordToNode);});
-      var _p46 = st;
-      switch (_p46.ctor)
-      {case "Jump": var _p47 = fstNod;
-           if (_p47.ctor === "Nothing") {
+      var _p47 = st;
+      switch (_p47.ctor)
+      {case "Jump": var _p48 = fstNod;
+           if (_p48.ctor === "Nothing") {
                  return _U.update(g$,{fstNod: mybNod});
               } else {
-                 var _p48 = mybNod;
-                 if (_p48.ctor === "Nothing") {
+                 var _p49 = mybNod;
+                 if (_p49.ctor === "Nothing") {
                        return g$;
                     } else {
-                       return A2(fastForward,{ctor: "_Tuple2",_0: _p47._0,_1: _p48._0},g$);
+                       return A2(fastForward,{ctor: "_Tuple2",_0: _p48._0,_1: _p49._0},g$);
                     }
               }
-         case "Slide": var _p49 = fstNod;
-           if (_p49.ctor === "Nothing") {
+         case "Slide": var _p50 = fstNod;
+           if (_p50.ctor === "Nothing") {
                  return _U.update(g$,{fstNod: mybNod});
               } else {
-                 var _p50 = mybNod;
-                 if (_p50.ctor === "Nothing") {
+                 var _p51 = mybNod;
+                 if (_p51.ctor === "Nothing") {
                        return g$;
                     } else {
-                       return A2(fastForward,{ctor: "_Tuple2",_0: _p49._0,_1: _p50._0},g$);
+                       return A2(fastForward,{ctor: "_Tuple2",_0: _p50._0,_1: _p51._0},g$);
                     }
               }
-         case "HasMill": var _p51 = mybNod;
-           if (_p51.ctor === "Nothing") {
+         case "HasMill": var _p52 = mybNod;
+           if (_p52.ctor === "Nothing") {
                  return g$;
               } else {
-                 var _p52 = _p51._0;
-                 return A2(fastForward,{ctor: "_Tuple2",_0: _p52,_1: _p52},g$);
+                 var _p53 = _p52._0;
+                 return A2(fastForward,{ctor: "_Tuple2",_0: _p53,_1: _p53},g$);
               }
-         case "Put": var _p53 = mybNod;
-           if (_p53.ctor === "Nothing") {
+         case "Put": var _p54 = mybNod;
+           if (_p54.ctor === "Nothing") {
                  return g$;
               } else {
-                 var _p54 = _p53._0;
-                 return A2(fastForward,{ctor: "_Tuple2",_0: _p54,_1: _p54},g$);
+                 var _p55 = _p54._0;
+                 return A2(fastForward,{ctor: "_Tuple2",_0: _p55,_1: _p55},g$);
               }
          default: return A2(fastForward,{ctor: "_Tuple2",_0: 0,_1: 0},g$);}
    });
    return _elm.Update.values = {_op: _op
-                               ,wizard: wizard
-                               ,magic: magic
                                ,isInMill: isInMill
                                ,fromTupToList: fromTupToList
                                ,checkMovement: checkMovement
@@ -9888,7 +9891,8 @@ Elm.View.make = function (_elm) {
    var selectBox = $Signal.mailbox($Maybe.Nothing);
    var selectBoardDropDown = A2($Graphics$Input.dropDown,
    $Signal.message(selectBox.address),
-   _U.list([{ctor: "_Tuple2",_0: "NineMensMorris",_1: $Maybe.Just($Model.Nine)}
+   _U.list([{ctor: "_Tuple2",_0: "",_1: $Maybe.Nothing}
+           ,{ctor: "_Tuple2",_0: "NineMensMorris",_1: $Maybe.Just($Model.Nine)}
            ,{ctor: "_Tuple2",_0: "RoundMensMorris",_1: $Maybe.Just($Model.Round)}
            ,{ctor: "_Tuple2",_0: "ThreeMensMorris",_1: $Maybe.Just($Model.Three)}
            ,{ctor: "_Tuple2",_0: "FiveMensMorris",_1: $Maybe.Just($Model.Five)}
