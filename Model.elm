@@ -248,3 +248,6 @@ hide st =
     Check
   else
     End
+
+
+type Board = Round | Three | Five | Six | Seven | Nine

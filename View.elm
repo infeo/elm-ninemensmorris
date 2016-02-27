@@ -121,7 +121,9 @@ displayInit =
     <| collage
         500
         500
-        [ startBut ]
+        [ startBut |> move (0,20)
+        , toForm selectBoardDropDown |> move (0, -20)
+        ]
 
 
 showPlayer : Player -> Form
@@ -156,18 +158,34 @@ buttonBox : Signal.Mailbox Bool
 buttonBox =
   Signal.mailbox True
 
+selectBox : Signal.Mailbox (Maybe Board)
+selectBox = Signal.mailbox Nothing
 
+selectBoardDropDown : Element
+selectBoardDropDown =
+    dropDown (Signal.message selectBox.address)
+        [ ("NineMensMorris", Just Nine)
+        , ("RoundMensMorris", Just Model.Round)
+        , ("ThreeMensMorris", Just Three)
+        , ("FiveMensMorris", Just Five)
+        , ("SixMensMorris", Just Six)
+        , ("SevenMensMorris", Just Seven)
+        ]
+        
+                            
 gui : Signal.Signal Game
 gui =
-  Signal.foldp reset initGame (Signal.map2 (,) Inputs.input buttonBox.signal)
+  Signal.foldp reset initGame <| Signal.map3(,,) Inputs.input buttonBox.signal selectBox.signal
 
 
-reset : ( ( Int, Int ), Bool ) -> Game -> Game
-reset ( click, replay ) g =
-  if replay then
-    initGame
-  else
-    Update.stepGame click g
+reset : ( ( Int, Int ), Bool, Maybe.Maybe Board ) -> Game -> Game
+reset ( click, replay, mybBo ) g =
+  case mybBo of
+    Nothing -> initGame 
+    _ -> if replay then
+            initGame
+         else
+            Update.stepGame click g -- für die KI: Update.kI click g
 
 
 main : Signal.Signal Element
